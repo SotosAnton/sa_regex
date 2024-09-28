@@ -1,0 +1,3 @@
+/home/sotiris/spp/regex/build/CMakeFiles/test_project.dir
+/home/sotiris/spp/regex/build/CMakeFiles/edit_cache.dir
+/home/sotiris/spp/regex/build/CMakeFiles/rebuild_cache.dir
