@@ -129,6 +129,54 @@ test_project/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_project.dir/build.make CMakeFiles/test_project.dir/build
 .PHONY : test_project/fast
 
+src/re_compiler.o: src/re_compiler.cpp.o
+.PHONY : src/re_compiler.o
+
+# target to build an object file
+src/re_compiler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_project.dir/build.make CMakeFiles/test_project.dir/src/re_compiler.cpp.o
+.PHONY : src/re_compiler.cpp.o
+
+src/re_compiler.i: src/re_compiler.cpp.i
+.PHONY : src/re_compiler.i
+
+# target to preprocess a source file
+src/re_compiler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_project.dir/build.make CMakeFiles/test_project.dir/src/re_compiler.cpp.i
+.PHONY : src/re_compiler.cpp.i
+
+src/re_compiler.s: src/re_compiler.cpp.s
+.PHONY : src/re_compiler.s
+
+# target to generate assembly for a file
+src/re_compiler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_project.dir/build.make CMakeFiles/test_project.dir/src/re_compiler.cpp.s
+.PHONY : src/re_compiler.cpp.s
+
+test.o: test.cpp.o
+.PHONY : test.o
+
+# target to build an object file
+test.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_project.dir/build.make CMakeFiles/test_project.dir/test.cpp.o
+.PHONY : test.cpp.o
+
+test.i: test.cpp.i
+.PHONY : test.i
+
+# target to preprocess a source file
+test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_project.dir/build.make CMakeFiles/test_project.dir/test.cpp.i
+.PHONY : test.cpp.i
+
+test.s: test.cpp.s
+.PHONY : test.s
+
+# target to generate assembly for a file
+test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_project.dir/build.make CMakeFiles/test_project.dir/test.cpp.s
+.PHONY : test.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -138,6 +186,12 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... test_project"
+	@echo "... src/re_compiler.o"
+	@echo "... src/re_compiler.i"
+	@echo "... src/re_compiler.s"
+	@echo "... test.o"
+	@echo "... test.i"
+	@echo "... test.s"
 .PHONY : help
 
 

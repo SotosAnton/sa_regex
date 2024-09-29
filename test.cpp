@@ -1,12 +1,17 @@
 #include <iostream>
-#include <regex/regex.hpp>
+#include <regex/re_compiler.hpp>
 
 int main(int argc, const char *argv[]) {
 
-  std::string input = "This is a 5 test for a regex engine";
+  std::string input = "3";
 
-  std::string re = "";
+  std::string re = "[0-9]";
 
-  auto result = regex(input, re);
+  unsigned count = 0;
+  auto bracket = regex::evaluateBracket(count, re);
+
+  std::cout << " Res : " << bracket.eval(input[0]) << '\n';
+
+  // auto result = regex(input, re);
   return 0;
 }

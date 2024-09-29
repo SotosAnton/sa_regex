@@ -8,6 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/sotiris/spp/regex/src/re_compiler.cpp" "CMakeFiles/test_project.dir/src/re_compiler.cpp.o" "gcc" "CMakeFiles/test_project.dir/src/re_compiler.cpp.o.d"
+  "/home/sotiris/spp/regex/test.cpp" "CMakeFiles/test_project.dir/test.cpp.o" "gcc" "CMakeFiles/test_project.dir/test.cpp.o.d"
   )
 
 # Targets to which this target links.

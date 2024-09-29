@@ -12,18 +12,21 @@ find_package(Eigen3 REQUIRED)
 
 project (test_project)
 
-set(SOURCESh
+include_directories(include)
+
+set(SOURCES
   test.cpp
+  # src/re_util.cpp
+  src/re_compiler.cpp
 )
 
 set(HEADERS
-    include/regex/regex.hpp
+  include/regex/re_util.hpp
+  include/regex/re_compiler.hpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+
 set_property(TARGET PROPERTY CXX_STANDARD 20)
 
-target_include_directories(${PROJECT_NAME} PRIVATE include ${EIGEN3_INCLUDE_DIR})
-message("${EIGEN3_INCLUDE_DIR}")
-
-target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)
+target_link_libraries(${PROJECT_NAME})

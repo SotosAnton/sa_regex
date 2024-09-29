@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wall -Wextra -g -rdynamic CMakeFiles/test_project.dir/test.cpp.o CMakeFiles/test_project.dir/src/re_compiler.cpp.o -o test_project 
