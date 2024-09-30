@@ -18,6 +18,7 @@ set(SOURCES
   test.cpp
   # src/re_util.cpp
   src/re_compiler.cpp
+  src/re_tree.cpp
 )
 
 set(HEADERS
