@@ -16,14 +16,15 @@ include_directories(include)
 
 set(SOURCES
   test.cpp
-  # src/re_util.cpp
-  src/re_compiler.cpp
-  src/re_tree.cpp
+  # src//til.cpp
+  src/compiler.cpp
+  src/reTree.cpp
+  src/opcode.cpp
 )
 
 set(HEADERS
-  include/regex/re_util.hpp
-  include/regex/re_compiler.hpp
+  include/regex/util.hpp
+  include/regex/compiler.hpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
