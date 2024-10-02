@@ -11,6 +11,9 @@ namespace regex {
 std::ostream &operator<<(std::ostream &out, const OpCode &value) {
   out << MAGENTA;
   switch (value) {
+  case OpCode::ROOT:
+    out << "@";
+    break;
   case OpCode::FINAL:
     out << "^";
     break;

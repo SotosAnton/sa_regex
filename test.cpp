@@ -11,7 +11,7 @@ int main(int argc, const char *argv[]) {
   // re = "^[aaa[33]]*[0-9]";
   // re = "^((a)(-^-)[-0-]-[[][]])$";
   // re = " .....$";
-  re = "[^0-1][a-c]";
+  re = "[^0-1]*[a-c]***";
   // unsigned count = 0;
   // auto bracket = regex::evaluateBracket(count, re);
   // std::cout << " Res : " << bracket.eval(input[0]) << '\n';

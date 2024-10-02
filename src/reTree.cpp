@@ -12,7 +12,7 @@ ReTree parseToTree(const std::string &re_str) {
 
   ReTree tree;
 
-  tree.nodes.emplace_back(-1, '@');
+  tree.nodes.emplace_back(-1, toInt(OpCode::ROOT));
 
   int last_node;
   unsigned i = 0;
@@ -37,9 +37,11 @@ ReTree parseToTree(const std::string &re_str) {
       break;
     case ']':
       if (tree.nodes.empty() ||
-          tree.nodes.at(parent_node_stack.top()).content !=
-              toInt(OpCode::BRACKET)) {
-        tree.nodes.emplace_back(parent_node_stack.top(), '[');
+          (tree.nodes.at(parent_node_stack.top()).content !=
+               toInt(OpCode::BRACKET) &&
+           tree.nodes.at(parent_node_stack.top()).content !=
+               toInt(OpCode::INV_BRACKET))) {
+        tree.nodes.emplace_back(parent_node_stack.top(), ']');
       } else {
         parent_node_stack.pop();
       }
@@ -60,8 +62,10 @@ ReTree parseToTree(const std::string &re_str) {
       }
       break;
     case '-':
-      if (tree.nodes.at(parent_node_stack.top()).content ==
-              toInt(OpCode::BRACKET) &&
+      if ((tree.nodes.at(parent_node_stack.top()).content ==
+               toInt(OpCode::INV_BRACKET) ||
+           tree.nodes.at(parent_node_stack.top()).content ==
+               toInt(OpCode::BRACKET)) &&
           (i + 1 < re_str.size() - 1) && re_str[i + 1] != ']' && (i - 1 > 0) &&
           re_str[i - 1] != '[') {
         last_node = tree.nodes.at(parent_node_stack.top()).children.back();
@@ -161,7 +165,8 @@ void printReTree(const ReTree &tree) {
 
   const ReNode &start_node = tree.nodes.at(tree.start_node);
 
-  std::cout << start_node.content << '\n';
+  regex::printContent(std::cout, start_node.content);
+  std::cout << '\n';
 
   while (!parent_node_stack.empty()) {
 
