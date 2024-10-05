@@ -1,8 +1,5 @@
 #include <regex/opcode.hpp>
 
-#define ESC "\033["
-#define LIGHT_BLUE_BKG "106"
-#define PURPLE_TXT "35"
 #define RESET "\033[m"
 #define MAGENTA "\033[35m" /* Magenta */
 
@@ -29,10 +26,10 @@ std::ostream &operator<<(std::ostream &out, const OpCode &value) {
   case OpCode::KLEENE_STAR:
     out << "*";
     break;
-  case OpCode::START:
+  case OpCode::AT_START:
     out << "^";
     break;
-  case OpCode::END:
+  case OpCode::AT_END:
     out << "$";
     break;
   case OpCode::RANGE:
@@ -45,4 +42,14 @@ std::ostream &operator<<(std::ostream &out, const OpCode &value) {
   out << RESET;
   return out;
 }
+
+std::ostream &printContent(std::ostream &output, const uint32_t &value) {
+  if (value < 0x10000) {
+    output << static_cast<char>(value);
+  } else {
+    output << static_cast<regex::OpCode>(value);
+  }
+  return output;
+}
+
 } // namespace regex

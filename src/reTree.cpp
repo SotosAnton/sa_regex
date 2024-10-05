@@ -12,7 +12,7 @@ ReTree parseToTree(const std::string &re_str) {
 
   ReTree tree;
 
-  tree.nodes.emplace_back(-1, toInt(OpCode::ROOT));
+  tree.nodes.emplace_back(-1, OpCode::ROOT);
 
   int last_node;
   unsigned i = 0;
@@ -21,39 +21,37 @@ ReTree parseToTree(const std::string &re_str) {
     switch (c) {
     case '^':
       if (i == 0) {
-        tree.push_node(parent_node_stack.top(), toInt(OpCode::START));
+        tree.push_node(parent_node_stack.top(), OpCode::AT_START);
         parent_node_stack.push(tree.back_intex());
       } else {
         if (re_str[i - 1] == '[')
-          if (tree.nodes.at(tree.back_intex()).content !=
-              toInt(OpCode::BRACKET))
+          if (tree.nodes.at(tree.back_intex()).content != OpCode::BRACKET)
             throw std::runtime_error("Bracket operator fail");
-        tree.nodes.at(tree.back_intex()).content = toInt(OpCode::INV_BRACKET);
+        tree.nodes.at(tree.back_intex()).content = OpCode::INV_BRACKET;
       }
       break;
     case '[':
-      tree.push_node(parent_node_stack.top(), toInt(OpCode::BRACKET));
+      tree.push_node(parent_node_stack.top(), OpCode::BRACKET);
       parent_node_stack.push(tree.back_intex());
       break;
     case ']':
       if (tree.nodes.empty() ||
-          (tree.nodes.at(parent_node_stack.top()).content !=
-               toInt(OpCode::BRACKET) &&
+          (tree.nodes.at(parent_node_stack.top()).content != OpCode::BRACKET &&
            tree.nodes.at(parent_node_stack.top()).content !=
-               toInt(OpCode::INV_BRACKET))) {
+               OpCode::INV_BRACKET)) {
         tree.nodes.emplace_back(parent_node_stack.top(), ']');
       } else {
         parent_node_stack.pop();
       }
       break;
     case '(':
-      tree.push_node(parent_node_stack.top(), toInt(OpCode::SUBEXPRESSION));
+      tree.push_node(parent_node_stack.top(), OpCode::SUBEXPRESSION);
       parent_node_stack.push(tree.back_intex());
       break;
     case ')':
       if (tree.nodes.empty() ||
           tree.nodes.at(parent_node_stack.top()).content !=
-              toInt(OpCode::SUBEXPRESSION)) {
+              OpCode::SUBEXPRESSION) {
         throw std::runtime_error(
             "Paranthesis Missmatch :" +
             tree.nodes.at(parent_node_stack.top()).content);
@@ -63,33 +61,30 @@ ReTree parseToTree(const std::string &re_str) {
       break;
     case '-':
       if ((tree.nodes.at(parent_node_stack.top()).content ==
-               toInt(OpCode::INV_BRACKET) ||
-           tree.nodes.at(parent_node_stack.top()).content ==
-               toInt(OpCode::BRACKET)) &&
+               OpCode::INV_BRACKET ||
+           tree.nodes.at(parent_node_stack.top()).content == OpCode::BRACKET) &&
           (i + 1 < re_str.size() - 1) && re_str[i + 1] != ']' && (i - 1 > 0) &&
           re_str[i - 1] != '[') {
         last_node = tree.nodes.at(parent_node_stack.top()).children.back();
-        tree.splitNodes(parent_node_stack.top(), last_node,
-                        toInt(OpCode::RANGE));
+        tree.splitNodes(parent_node_stack.top(), last_node, OpCode::RANGE);
         tree.push_node(tree.back_intex(), re_str[++i]);
       } else {
         tree.push_node(parent_node_stack.top(), '-');
       }
       break;
     case '.':
-      tree.push_node(parent_node_stack.top(), toInt(OpCode::ANY_CHAR));
+      tree.push_node(parent_node_stack.top(), OpCode::ANY_CHAR);
       break;
     case '$':
       if (i == re_str.size() - 1) {
-        tree.push_node(0, toInt(OpCode::END));
+        tree.push_node(0, OpCode::AT_END);
       } else {
         tree.push_node(parent_node_stack.top(), '$');
       }
       break;
     case '*':
       last_node = tree.nodes.at(parent_node_stack.top()).children.back();
-      tree.splitNodes(parent_node_stack.top(), last_node,
-                      toInt(OpCode::KLEENE_STAR));
+      tree.splitNodes(parent_node_stack.top(), last_node, OpCode::KLEENE_STAR);
       break;
     default:
       tree.push_node(parent_node_stack.top(), c);
@@ -100,8 +95,11 @@ ReTree parseToTree(const std::string &re_str) {
   while (!parent_node_stack.empty()) {
     auto node_id = parent_node_stack.top();
     parent_node_stack.pop();
-    std::cout << "Unresolved content : " << tree.nodes.at(node_id).content
-              << '\n';
+    if (tree.nodes.at(node_id).content != OpCode::ROOT) {
+      std::cout << "Unresolved content : ";
+      regex::printContent(std::cout, tree.nodes.at(node_id).content);
+      std::cout << '\n';
+    }
   }
   // return std::move(tree);
   return tree;
@@ -145,15 +143,6 @@ ReTree alignTree(const ReTree &tree) {
   }
 
   return new_tree;
-}
-
-std::ostream &printContent(std::ostream &output, const uint32_t &value) {
-  if (value < 0x10000) {
-    output << static_cast<char>(value);
-  } else {
-    output << static_cast<regex::OpCode>(value);
-  }
-  return output;
 }
 
 void printReTree(const ReTree &tree) {
