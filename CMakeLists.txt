@@ -17,14 +17,15 @@ include_directories(include)
 set(SOURCES
   test.cpp
   # src//til.cpp
-  src/compiler.cpp
+  src/state_machine.cpp
+  src/tree_machine.cpp
   src/reTree.cpp
   src/opcode.cpp
 )
 
 set(HEADERS
   include/regex/util.hpp
-  include/regex/compiler.hpp
+  include/regex/state_machine.hpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

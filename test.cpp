@@ -1,7 +1,6 @@
 #include <iostream>
-#include <regex/compiler.hpp>
 #include <regex/reTree.hpp>
-#include <regex/tests.hpp>
+#include <regex/state_machine.hpp>
 
 int main(int argc, const char *argv[]) {
 
@@ -11,7 +10,7 @@ int main(int argc, const char *argv[]) {
   // re = "^[aaa[33]]*[0-9]";
   // re = "^((a)(-^-)[-0-]-[[][]])$";
   // re = " .....$";
-  re = "[^0-1]*[a-c]***";
+  re = "[^0-1][a-c]";
   // unsigned count = 0;
   // auto bracket = regex::evaluateBracket(count, re);
   // std::cout << " Res : " << bracket.eval(input[0]) << '\n';
@@ -21,9 +20,9 @@ int main(int argc, const char *argv[]) {
 
   regex::printReTree(tree);
 
-  auto new_tree = regex::alignTree(tree);
+  // auto new_tree = regex::alignTree(tree);
 
-  regex::printReTree(new_tree);
+  auto engine = regex::buildStateMachineFromTree(tree);
 
   return 0;
 }

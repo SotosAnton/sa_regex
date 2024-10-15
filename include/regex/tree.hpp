@@ -37,6 +37,8 @@ template <typename T> struct Tree {
 
     nodes.at(parent).children;
   }
+  const Node<T> &getNode(const unsigned i) const { return nodes.at(i); }
+  Node<T> &getNode(const unsigned i) { return nodes.at(i); }
 };
 
 } // namespace regex
