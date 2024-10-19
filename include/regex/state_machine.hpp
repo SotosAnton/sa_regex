@@ -9,13 +9,28 @@ typedef std::function<bool /* next_state */ (u_int32_t /* content */)>
     TransisionFunction;
 
 struct Transision {
-  TransisionFunction func;
-  size_t destination;
+
   Transision(const size_t destination, const TransisionFunction &func)
       : func(func), destination(destination) {}
 
   Transision(const size_t destination, const TransisionFunction &&func)
       : func(func), destination(destination) {}
+
+  std::string label; /* TODO: only use in debug*/
+  TransisionFunction func;
+  size_t destination;
+};
+
+struct E_Transision {
+
+  E_Transision(const size_t destination) : destination(destination) {}
+  E_Transision() : destination(0) {}
+
+  inline bool active() const { return destination != 0; }
+  inline size_t get() const { return destination; }
+  std::string label; /* TODO: only use in debug*/
+
+  size_t destination;
 };
 
 struct MachineState {
@@ -29,12 +44,18 @@ struct StateNode {
   std::vector<Transision> transisions;
   size_t default_transision = 0;
 
+  E_Transision e_transision;
+
   mutable size_t state; /* TODO: Remove mutable*/
 
   StateNode(const size_t default_transision)
       : default_transision(default_transision) {}
 
   StateNode() : default_transision(0) {}
+
+  void addE_transision(const size_t destination) {
+    e_transision.destination = destination;
+  }
 
   void pushTransision(const size_t destination,
                       const TransisionFunction &func) {
@@ -45,16 +66,20 @@ struct StateNode {
                       const TransisionFunction &&func) {
     transisions.emplace_back(destination, func);
   }
+
+  void pushTransisionLabel(const std::string &label) {
+    transisions.back().label = label;
+  }
 };
 
 struct StateMachine {
   std::vector<StateNode> states;
-  std::stack<MachineState> exec_stack;
   size_t start_state;
   size_t final_state;
 
   StateNode &back() { return states.back(); }
-  size_t size() { return states.size(); }
+  const StateNode &back() const { return states.back(); }
+  size_t size() const { return states.size(); }
 
   StateNode &at(size_t i) { return states.at(i); }
   const StateNode &at(size_t i) const { return states.at(i); }

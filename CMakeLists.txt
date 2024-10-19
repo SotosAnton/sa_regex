@@ -18,6 +18,8 @@ set(SOURCES
   test.cpp
   # src//til.cpp
   src/state_machine.cpp
+  src/build_state_machine.cpp
+  src/state_machine_export.cpp
   src/tree_machine.cpp
   src/reTree.cpp
   src/opcode.cpp
