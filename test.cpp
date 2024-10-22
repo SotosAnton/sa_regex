@@ -6,17 +6,17 @@
 int main(int argc, const char *argv[]) {
 
   std::string input = "3";
+  std::string re = "abc[1-5]*x";
 
-  std::string re = "[0-9[aaa]][a-c]*b";
-  // re = "^[aaa[33]]*[0-9]";
-  // re = "^((a)(-^-)[-0-]-[[][]])$";
-  // re = " .....$";
-  re = "abc[1-5rty]b";
-  // unsigned count = 0;
-  // auto bracket = regex::evaluateBracket(count, re);
-  // std::cout << " Res : " << bracket.eval(input[0]) << '\n';
-  // auto result = regex(input, re);
+  if (argc == 2) {
+    re = argv[1];
+  } else if (argc == 3) {
+    re = argv[1];
+    input = argv[2];
+  }
+
   std::cout << re << '\n';
+  std::cout << input << '\n';
   regex::Tree tree = regex::parseToTree(re);
 
   regex::printReTree(tree);
@@ -29,8 +29,7 @@ int main(int argc, const char *argv[]) {
             << regex::writeMachineDescriptionToFile("engine.txt", engine)
             << '\n';
 
-  std::cout << " Run : " << regex::runStateMachine(engine, "qwertabc12345b")
-            << '\n';
+  std::cout << " Run : " << regex::runStateMachine(engine, input) << '\n';
 
   return 0;
 }

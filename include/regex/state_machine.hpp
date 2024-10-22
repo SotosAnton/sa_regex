@@ -73,9 +73,6 @@ struct StateNode {
 };
 
 struct StateMachine {
-  std::vector<StateNode> states;
-  size_t start_state;
-  size_t final_state;
 
   StateNode &back() { return states.back(); }
   const StateNode &back() const { return states.back(); }
@@ -83,6 +80,12 @@ struct StateMachine {
 
   StateNode &at(size_t i) { return states.at(i); }
   const StateNode &at(size_t i) const { return states.at(i); }
+  size_t splitNodes(const size_t origin, const size_t destination,
+                    const size_t default_transision);
+
+  std::vector<StateNode> states;
+  size_t start_state;
+  size_t final_state;
 };
 
 StateMachine buildStateMachineFromTree(const ReTree &tree);
