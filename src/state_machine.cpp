@@ -59,8 +59,8 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
       }
     }
 
-    if (node.e_transision.active())
-      exec_stack.emplace(node.e_transision.destination, state.input_id);
+    for (auto transision : node.e_transisions)
+      exec_stack.emplace(transision, state.input_id);
 
     if (!transision_succes) {
       if (exec_stack.empty()) {

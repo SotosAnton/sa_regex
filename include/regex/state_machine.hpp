@@ -21,18 +21,6 @@ struct Transision {
   size_t destination;
 };
 
-struct E_Transision {
-
-  E_Transision(const size_t destination) : destination(destination) {}
-  E_Transision() : destination(0) {}
-
-  inline bool active() const { return destination != 0; }
-  inline size_t get() const { return destination; }
-  std::string label; /* TODO: only use in debug*/
-
-  size_t destination;
-};
-
 struct MachineState {
   size_t node_id;
   size_t input_id;
@@ -44,7 +32,7 @@ struct StateNode {
   std::vector<Transision> transisions;
   size_t default_transision = 0;
 
-  E_Transision e_transision;
+  std::vector<size_t> e_transisions;
 
   mutable size_t state; /* TODO: Remove mutable*/
 
@@ -53,8 +41,8 @@ struct StateNode {
 
   StateNode() : default_transision(0) {}
 
-  void addE_transision(const size_t destination) {
-    e_transision.destination = destination;
+  void push_E_transision(const size_t destination) {
+    e_transisions.push_back(destination);
   }
 
   void pushTransision(const size_t destination,

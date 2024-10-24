@@ -40,20 +40,13 @@ StateMachine buildStateMachineFromTree(const ReTree &tree) {
 
     size_t next_node_id;
     if (build_state.loop_back) {
-      std::cout << "Loop back from: " << prev_node_id << " to "
-                << build_state.loop_index << " empty : " << '\n';
+      // std::cout << "Loop back from: " << prev_node_id << " to "
+      //           << build_state.loop_index << " empty : " << '\n';
       StateNode &loop_node = state_machine.states.at(prev_node_id);
 
-      std::cout << "loop_node.transisions.empty() "
-                << loop_node.transisions.empty() << '\n';
-      if (loop_node.transisions.empty()) {
-        loop_node.default_transision = build_state.loop_index;
-        loop_node.e_transision.destination = build_state.loop_index;
-      }
-      for (auto &transision : loop_node.transisions) {
-        transision.destination = build_state.loop_index;
-      }
-      prev_node_id = build_state.loop_index + 1;
+      loop_node.push_E_transision(build_state.tree_node);
+      loop_node.push_E_transision(build_state.loop_index);
+      prev_node_id = build_state.loop_index;
       continue;
     }
 
@@ -100,28 +93,34 @@ StateMachine buildStateMachineFromTree(const ReTree &tree) {
       break;
     case OpCode::KLEENE_STAR:
 
-      tree_deque.emplace_front(0, prev_node_id, true);
+      state_machine.states.back().push_E_transision(next_node_id);
+      state_machine.states.back().push_E_transision(next_node_id + 1);
 
       state_machine.states.emplace_back(0);
 
-      state_machine.states.at(prev_node_id).e_transision.destination =
-          next_node_id;
+      state_machine.states.emplace_back(0);
 
+      prev_node_id = state_machine.size() - 1;
       next_node_id = prev_node_id;
+
+      tree_deque.emplace_front(state_machine.size() - 1,
+                               state_machine.size() - 2, true);
 
       for (std::vector<int>::const_reverse_iterator riter =
                current_node.children.rbegin();
            riter != current_node.children.rend(); ++riter) {
-        tree_deque.push_front(*riter);
+        tree_deque.emplace_front(*riter);
       }
-
-      break;
+      continue;
+      // break;
     case OpCode::RANGE:
       throw std::runtime_error("Invalid RANGE Opcode");
       break;
     case OpCode::SUBEXPRESSION:
-      for (unsigned child_id : current_node.children) {
-        tree_deque.emplace_back(child_id);
+      for (std::vector<int>::const_reverse_iterator riter =
+               current_node.children.rbegin();
+           riter != current_node.children.rend(); ++riter) {
+        tree_deque.emplace_front(*riter);
       }
       break;
     default:

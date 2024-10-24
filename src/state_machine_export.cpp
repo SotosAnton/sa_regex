@@ -25,9 +25,9 @@ std::string generateStateMachineDescription(const StateMachine &engine) {
       output << '\n';
     }
 
-    if (current_node.e_transision.active()) {
-      output << to_string(i) << " -> "
-             << to_string(current_node.e_transision.get()) << " [e]" << '\n';
+    for (auto &transision : current_node.e_transisions) {
+      output << to_string(i) << " -> " << to_string(transision) << " [e]"
+             << '\n';
     }
 
     if (current_node.default_transision != engine.start_state) {

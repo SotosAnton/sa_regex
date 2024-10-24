@@ -1,7 +1,8 @@
 # Importing necessary libraries
 import networkx as nx
 import matplotlib.pyplot as plt
-
+import time
+import os 
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 # Defining the GraphVisualization class
@@ -9,15 +10,19 @@ class GraphVisualization:
 
     def __init__(self):
         # List to store the edges and labels of the graph
+        self.reset()
+
+        self.color_dict = { 'init':(0,0,1),
+                            'default':(1,0,0),
+                            'final':(0,1,0)}
+        
+    def reset(self):
         self.visual = []
         self.labels = {}  # Dictionary to store edge labels
         self.node_colors = {}  # Dictionary to store edge labels
         self.init_node = -1
         self.final_node = -1
 
-        self.color_dict = { 'init':(0,0,1),
-                            'default':(1,0,0),
-                            'final':(0,1,0)}
 
     # Method to add an edge and label to the visual list
     def addEdge(self, a, b, label=''):
@@ -41,20 +46,31 @@ class GraphVisualization:
             self.node_colors[self.final_node] = self.color_dict['final']
 
 
-        colors = [() for i in range(len(self.node_colors))]
+        colors = [(0.5,0.5,0.5) for i in range(len(self.node_colors))]
 
         for item, color in self.node_colors.items():
-            colors[item] = color
+            if item < len(colors):
+                colors[item] = color
+
         print(colors)
         print(self.node_colors)
+        self.ax.clear()
 
         pos = nx.shell_layout(G)  # Positioning the nodes
-        nx.draw_networkx(G, pos, arrows=True , node_color = colors)
+        nx.draw_networkx(G, pos, arrows=True , node_color = colors, ax=self.ax)
         
         # Draw edge labels, handling multiple edges by appending labels
-        nx.draw_networkx_edge_labels(G, pos, edge_labels=self.labels, connectionstyle='arc3, rad = 0.1')
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=self.labels, connectionstyle='arc3, rad = 0.1',ax=self.ax)
 
-        plt.show()
+        # drawing updated values
+        self.figure.canvas.draw()
+    
+        # This will run the GUI event
+        # loop until all UI events
+        # currently waiting have been processed
+        self.figure.canvas.flush_events()
+        
+        plt.draw()
 
     # Method to load edges and labels from a file
     def load_from_file(self, file_path):
@@ -87,11 +103,47 @@ class GraphVisualization:
                         self.final_node = int(parts[1].strip())
                         print('final = ' , self.final_node)
 
-# Driver code
-G = GraphVisualization()
+    def load_file_contents(self, file):
+        
+        self.reset()
+        # Load edges and labels from a file (replace 'state_machine.txt' with your file path)
+        self.load_from_file(file)
 
-# Load edges and labels from a file (replace 'state_machine.txt' with your file path)
-G.load_from_file('engine.txt')
+        # Visualize the graph
+        self.visualize()
 
-# Visualize the graph
-G.visualize()
+
+    def watch_file(self, file_path, check_interval=1):
+
+        # Initialize the plot
+        plt.ion()  # Enable interactive mode
+        self.figure, self.ax = plt.subplots()
+
+        """Watches a file for changes and reloads contents if modified."""
+        if not os.path.exists(file_path):
+            print(f"File '{file_path}' does not exist.")
+            return
+
+        last_mtime = 0
+        print("Watching for file changes...")
+
+        while True:            
+            try:
+                current_mtime = os.path.getmtime(file_path)
+                if current_mtime != last_mtime:
+                    print("File has changed, reloading contents...")
+                    self.load_file_contents(file_path)               
+                    last_mtime = current_mtime
+            except FileNotFoundError:
+                print(f"File '{file_path}' was deleted.")
+                break
+            time.sleep(check_interval)
+
+if __name__ == "__main__":
+
+     # Driver code
+    G = GraphVisualization()
+
+
+    file_path = "engine.txt"  # Replace with your file path
+    G.watch_file(file_path)
