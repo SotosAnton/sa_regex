@@ -26,9 +26,9 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
   MachineState state(engine.start_state, 0);
   std::stack<MachineState> exec_stack;
 
-  std::cout << "Start run from: " << state.node_id
-            << " Final: " << engine.final_state << '\n';
-  std::cout << " Input:" << input << '\n';
+  DEBUG_STDOUT("Start run from: " << state.node_id
+                                  << " Final: " << engine.final_state << '\n');
+  DEBUG_STDOUT(" Input:" << input << '\n')
 
   while (state.node_id != engine.final_state) {
 
@@ -39,19 +39,20 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
 
         state = exec_stack.top();
         exec_stack.pop();
-        std::cout << " recover next: " << state.node_id << ", "
-                  << state.input_id + 1 << '/' << input.size() << '\n';
+        DEBUG_STDOUT(" recover next: " << state.node_id << ", "
+                                       << state.input_id + 1 << '/'
+                                       << input.size() << '\n');
       }
 
     char c = input[state.input_id];
-    std::cout << "State: " << state.node_id << " c: " << c;
+    DEBUG_STDOUT("State: " << state.node_id << " c: " << c)
     auto &node = engine.at(state.node_id);
     node.state = state.input_id;
     bool transision_succes = false;
     for (auto transision : node.transisions) {
 
       bool eval = transision.func(c);
-      std::cout << " func eval = " << eval << '\n';
+      DEBUG_STDOUT(" func eval = " << eval << '\n')
       if (eval) {
         transision_succes = true;
         state.node_id = transision.destination;
@@ -71,18 +72,18 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
         exec_stack.pop();
         state.node_id = recovery_state.node_id;
         state.input_id = recovery_state.input_id;
-        std::cout << " pop e = " << recovery_state.node_id << " "
-                  << recovery_state.input_id << '\n';
+        DEBUG_STDOUT(" pop e = " << recovery_state.node_id << " "
+                                 << recovery_state.input_id << '\n');
         continue;
       }
     }
 
-    std::cout << " next: " << state.node_id << ", " << state.input_id + 1 << '/'
-              << input.size() << '\n';
+    DEBUG_STDOUT(" next: " << state.node_id << ", " << state.input_id + 1 << '/'
+                           << input.size() << '\n');
     state.input_id++;
   }
 
-  std::cout << " exec_stack : " << exec_stack.size() << "\n";
+  DEBUG_STDOUT(" exec_stack : " << exec_stack.size() << "\n")
 
   return state.node_id == engine.final_state;
 }

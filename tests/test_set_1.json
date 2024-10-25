@@ -1,0 +1,107 @@
+[
+    {
+        "re": "hello",
+        "match": ["hello"],
+        "skip": ["hllo", "Hello"]
+    },
+    {
+        "re": "h.llo",
+        "match": ["hello", "hallo"],
+        "skip": ["hllo", "hhllo"]
+    },
+    {
+        "re": "h[aeiou]llo",
+        "match": ["hello", "hallo", "hollo"],
+        "skip": ["hillo", "hllo"]
+    },
+    {
+        "re": "h[a-z]llo",
+        "match": ["hello", "hallo", "hollo"],
+        "skip": ["hAello", "Hillo"]
+    },
+    {
+        "re": "a*",
+        "match": ["", "a", "aa", "aaa"],
+        "skip": ["b", "ba"]
+    },
+    {
+        "re": "a+",
+        "match": ["a", "aa", "aaa"],
+        "skip": ["", "b"]
+    },
+    {
+        "re": "ca?t",
+        "match": ["cat", "ct"],
+        "skip": ["caaat", "bat"]
+    },
+    {
+        "re": "^hello",
+        "match": ["hello world", "hello"],
+        "skip": ["world hello", " say hello"]
+    },
+    {
+        "re": "world$",
+        "match": ["hello world", "world"],
+        "skip": ["world hello", "worldly"]
+    },
+    {
+        "re": "(cat|dog)",
+        "match": ["cat", "dog", "my dog"],
+        "skip": ["bat", "caterpillar"]
+    },
+    {
+        "re": "(a(b|c)d)",
+        "match": ["abd", "acd"],
+        "skip": ["abcd", "abbd"]
+    },
+    {
+        "re": "\\$5\\.00",
+        "match": ["$5.00"],
+        "skip": ["5.00", "$5,00"]
+    },
+    {
+        "re": "\\d{3}-\\d{2}-\\d{4}",
+        "match": ["123-45-6789"],
+        "skip": ["1234-56-7890", "12-3456-7890"]
+    },
+    {
+        "re": "\\d+",
+        "match": ["123", "456", "0"],
+        "skip": ["abc", "1.2.3"]
+    },
+    {
+        "re": "\\D+",
+        "match": ["abc", "hello", "#!@"],
+        "skip": ["123", "a1b"]
+    },
+    {
+        "re": "\\bword\\b",
+        "match": ["a word here", "word."],
+        "skip": ["sword", "words"]
+    },
+    {
+        "re": "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}",
+        "match": ["user@example.com", "name123@mail.co"],
+        "skip": ["user@.com", "@example.com", "user.com"]
+    },
+    {
+        "re": "\\(?\\d{3}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}",
+        "match": ["123-456-7890", "(123) 456-7890", "123.456.7890"],
+        "skip": ["123-45-6789", "123456789"]
+    },
+    {
+        "re": "#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})",
+        "match": ["#FFAABB", "#fab", "#123456"],
+        "skip": ["123456", "#FFG123", "#1234"]
+    },
+    {
+        "re": "a.*b",
+        "match": ["a123b", "ab", "a_b_b"],
+        "skip": ["b123a", "a123"]
+    },
+    {
+        "re": "a.*?b",
+        "match": ["a123b", "ab"],
+        "skip": ["a123b456b"]
+    }
+]

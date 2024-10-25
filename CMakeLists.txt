@@ -10,12 +10,12 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 find_package(Eigen3 REQUIRED)
 
-project (test_project)
+project (sregex)
 
 include_directories(include)
 
 set(SOURCES
-  test.cpp
+  
   # src//til.cpp
   src/state_machine.cpp
   src/build_state_machine.cpp
@@ -23,6 +23,7 @@ set(SOURCES
   src/tree_machine.cpp
   src/reTree.cpp
   src/opcode.cpp
+  
 )
 
 set(HEADERS
@@ -30,8 +31,11 @@ set(HEADERS
   include/regex/state_machine.hpp
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME}_run test.cpp )
+add_executable(${PROJECT_NAME}_test run_tests.cpp )
 
 set_property(TARGET PROPERTY CXX_STANDARD 20)
 
-target_link_libraries(${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}_run ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})

@@ -96,9 +96,9 @@ ReTree parseToTree(const std::string &re_str) {
     auto node_id = parent_node_stack.top();
     parent_node_stack.pop();
     if (tree.nodes.at(node_id).content != OpCode::ROOT) {
-      std::cout << "Unresolved content : ";
+      DEBUG_STDOUT("Unresolved content : ")
       regex::printContent(std::cout, tree.nodes.at(node_id).content);
-      std::cout << '\n';
+      DEBUG_STDOUT('\n')
     }
   }
   // return std::move(tree);

@@ -2,6 +2,24 @@
 #include <functional>
 #include <string>
 
+// #define DEBUG
+
+#ifdef DEBUG
+#define DEBUG_STDERR(x)                                                        \
+  do {                                                                         \
+    std::cerr << x;                                                            \
+  } while (false);
+#define DEBUG_STDOUT(x)                                                        \
+  do {                                                                         \
+    std::cout << x;                                                            \
+  } while (false);
+//... etc
+#else
+#define DEBUG_STDERR(x)
+#define DEBUG_STDOUT(x)
+//... etc
+#endif
+
 namespace regex {
 
 inline bool isInRange(char c, char low, char high) {

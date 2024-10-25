@@ -57,6 +57,7 @@ class GraphVisualization:
         self.ax.clear()
 
         pos = nx.shell_layout(G)  # Positioning the nodes
+        pos = nx.planar_layout(G)  # Positioning the nodes
         nx.draw_networkx(G, pos, arrows=True , node_color = colors, ax=self.ax)
         
         # Draw edge labels, handling multiple edges by appending labels

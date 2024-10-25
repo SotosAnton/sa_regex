@@ -40,8 +40,8 @@ StateMachine buildStateMachineFromTree(const ReTree &tree) {
 
     size_t next_node_id;
     if (build_state.loop_back) {
-      // std::cout << "Loop back from: " << prev_node_id << " to "
-      //           << build_state.loop_index << " empty : " << '\n';
+      // DEBUG_STDOUT( "Loop back from: " << prev_node_id << " to "
+      //           << build_state.loop_index << " empty : " << '\n');
       StateNode &loop_node = state_machine.states.at(prev_node_id);
 
       loop_node.push_E_transision(build_state.tree_node);
@@ -52,9 +52,9 @@ StateMachine buildStateMachineFromTree(const ReTree &tree) {
 
     next_node_id = state_machine.size();
 
-    std::cout << "Adding State: "
-              << static_cast<regex::OpCode>(current_node.content) << " from "
-              << prev_node_id << " to  " << next_node_id << '\n';
+    DEBUG_STDOUT("Adding State: "
+                 << static_cast<regex::OpCode>(current_node.content) << " from "
+                 << prev_node_id << " to  " << next_node_id << '\n');
 
     switch (current_node.content) {
     case OpCode::ROOT:
@@ -125,9 +125,9 @@ StateMachine buildStateMachineFromTree(const ReTree &tree) {
       break;
     default:
       state_machine.states.emplace_back(0);
-      std::cout << "Add Transision  = "
-                << static_cast<regex::OpCode>(current_node.content) << " to "
-                << next_node_id << '\n';
+      DEBUG_STDOUT("Add Transision  = "
+                   << static_cast<regex::OpCode>(current_node.content) << " to "
+                   << next_node_id << '\n');
       state_machine.at(prev_node_id)
           .pushTransision(
               next_node_id,
