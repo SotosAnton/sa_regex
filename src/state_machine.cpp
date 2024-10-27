@@ -1,5 +1,5 @@
 #include <iostream>
-#include <regex/build_state_machine.hpp>
+#include <regex/state_machine.hpp>
 #include <stack>
 #include <stdexcept>
 

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <regex/builder.hpp>
 #include <regex/reTree.hpp>
 #include <regex/state_machine.hpp>
 #include <regex/state_machine_export.hpp>

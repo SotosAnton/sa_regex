@@ -18,7 +18,7 @@ set(SOURCES
   
   # src//til.cpp
   src/state_machine.cpp
-  src/build_state_machine.cpp
+  src/builder.cpp
   src/state_machine_export.cpp
   src/tree_machine.cpp
   src/reTree.cpp

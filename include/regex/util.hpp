@@ -2,7 +2,7 @@
 #include <functional>
 #include <string>
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #define DEBUG_STDERR(x)                                                        \

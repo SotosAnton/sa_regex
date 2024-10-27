@@ -76,7 +76,8 @@ struct StateMachine {
   size_t final_state;
 };
 
-StateMachine buildStateMachineFromTree(const ReTree &tree);
+bool runStateMachine(std::unique_ptr<const StateMachine> engine,
+                     const std::string &input);
 
 bool runStateMachine(const StateMachine &engine, const std::string &input);
 
