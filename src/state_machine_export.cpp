@@ -1,4 +1,3 @@
-#pragma once
 #include <iostream>
 #include <regex/state_machine_export.hpp>
 

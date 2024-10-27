@@ -18,7 +18,7 @@ std::ostream &operator<<(std::ostream &out, const OpCode &value) {
     case OpCode::FINAL:
       out << "^";
       break;
-    case OpCode::ANY_CHAR:
+    case OpCode::WILDCARD:
       out << ".";
       break;
     case OpCode::BRACKET:
@@ -42,19 +42,16 @@ std::ostream &operator<<(std::ostream &out, const OpCode &value) {
     case OpCode::SUBEXPRESSION:
       out << "()";
       break;
+    case OpCode::REPETITION:
+      out << "+";
+      break;
+    case OpCode::OPTIONAL:
+      out << "?";
+      break;
     }
     out << RESET;
   }
   return out;
-}
-
-std::ostream &printContent(std::ostream &output, const uint32_t &value) {
-  if (value < 0x10000) {
-    output << static_cast<char>(value);
-  } else {
-    output << static_cast<regex::OpCode>(value);
-  }
-  return output;
 }
 
 } // namespace regex

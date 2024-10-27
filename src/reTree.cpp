@@ -73,7 +73,7 @@ ReTree parseToTree(const std::string &re_str) {
       }
       break;
     case '.':
-      tree.push_node(parent_node_stack.top(), OpCode::ANY_CHAR);
+      tree.push_node(parent_node_stack.top(), OpCode::WILDCARD);
       break;
     case '$':
       if (i == re_str.size() - 1) {
@@ -86,6 +86,14 @@ ReTree parseToTree(const std::string &re_str) {
       last_node = tree.nodes.at(parent_node_stack.top()).children.back();
       tree.splitNodes(parent_node_stack.top(), last_node, OpCode::KLEENE_STAR);
       break;
+    case '+':
+      last_node = tree.nodes.at(parent_node_stack.top()).children.back();
+      tree.splitNodes(parent_node_stack.top(), last_node, OpCode::REPETITION);
+      break;
+    case '?':
+      last_node = tree.nodes.at(parent_node_stack.top()).children.back();
+      tree.splitNodes(parent_node_stack.top(), last_node, OpCode::OPTIONAL);
+      break;
     default:
       tree.push_node(parent_node_stack.top(), c);
     };
@@ -96,9 +104,9 @@ ReTree parseToTree(const std::string &re_str) {
     auto node_id = parent_node_stack.top();
     parent_node_stack.pop();
     if (tree.nodes.at(node_id).content != OpCode::ROOT) {
-      DEBUG_STDOUT("Unresolved content : ")
-      regex::printContent(std::cout, tree.nodes.at(node_id).content);
-      DEBUG_STDOUT('\n')
+      DEBUG_STDOUT("Unresolved content : "
+                   << static_cast<OpCode>(tree.nodes.at(node_id).content)
+                   << '\n')
     }
   }
   // return std::move(tree);
@@ -154,8 +162,7 @@ void printReTree(const ReTree &tree) {
 
   const ReNode &start_node = tree.nodes.at(tree.start_node);
 
-  regex::printContent(std::cout, start_node.content);
-  std::cout << '\n';
+  std::cout << static_cast<OpCode>(start_node.content) << '\n';
 
   while (!parent_node_stack.empty()) {
 
@@ -171,9 +178,8 @@ void printReTree(const ReTree &tree) {
       int child_id = current_node.children.at(j);
 
       std::cout << '(' << tree.nodes.at(child_id).parent << ',' << child_id
-                << ')';
-      regex::printContent(std::cout, tree.nodes.at(child_id).content);
-      std::cout << " ";
+                << ')' << static_cast<OpCode>(tree.nodes.at(child_id).content)
+                << " ";
 
       for (unsigned k = 1; k < tree.nodes.at(child_id).children.size(); k++)
         std::cout << "       ";

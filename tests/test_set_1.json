@@ -7,12 +7,12 @@
     {
         "re": "h.llo",
         "match": ["hello", "hallo"],
-        "skip": ["hllo", "hhllo"]
+        "skip": ["hllo", "phllo"]
     },
     {
         "re": "h[aeiou]llo",
         "match": ["hello", "hallo", "hollo"],
-        "skip": ["hillo", "hllo"]
+        "skip": ["hbllo", "hcllo","hllo"]
     },
     {
         "re": "h[a-z]llo",

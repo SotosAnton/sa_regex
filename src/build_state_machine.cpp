@@ -11,6 +11,7 @@ struct BuildItem {
   size_t tree_node;
   size_t loop_index;
   bool loop_back;
+  bool entering;
 
   BuildItem(size_t a) : tree_node(a), loop_index(0), loop_back(false) {}
 
@@ -40,12 +41,20 @@ StateMachine buildStateMachineFromTree(const ReTree &tree) {
 
     size_t next_node_id;
     if (build_state.loop_back) {
-      // DEBUG_STDOUT( "Loop back from: " << prev_node_id << " to "
-      //           << build_state.loop_index << " empty : " << '\n');
+      DEBUG_STDOUT("Loop back from: " << prev_node_id << " to "
+                                      << build_state.loop_index
+                                      << " empty : " << '\n');
       StateNode &loop_node = state_machine.states.at(prev_node_id);
 
+      // Back to start of loop
+      // if (build_state.tree_node != 0)
       loop_node.push_E_transision(build_state.tree_node);
+
+      // Next state to get out of loop
+
+      // if (build_state.loop_index != 0)
       loop_node.push_E_transision(build_state.loop_index);
+
       prev_node_id = build_state.loop_index;
       continue;
     }
@@ -103,14 +112,37 @@ StateMachine buildStateMachineFromTree(const ReTree &tree) {
       prev_node_id = state_machine.size() - 1;
       next_node_id = prev_node_id;
 
-      tree_deque.emplace_front(state_machine.size() - 1,
-                               state_machine.size() - 2, true);
+      tree_deque.emplace_front(state_machine.size() - 1, /* loop back*/
+                               state_machine.size() - 2 /* loop next*/, true);
 
       for (std::vector<int>::const_reverse_iterator riter =
                current_node.children.rbegin();
            riter != current_node.children.rend(); ++riter) {
         tree_deque.emplace_front(*riter);
       }
+      continue;
+      // break;
+    case OpCode::REPETITION:
+
+      // state_machine.states.back().push_E_transision(next_node_id);
+      // state_machine.states.back().push_E_transision(next_node_id + 1);
+
+      state_machine.states.emplace_back(0);
+
+      // state_machine.states.emplace_back(0);
+
+      prev_node_id = state_machine.size() - 2;
+      next_node_id = prev_node_id;
+
+      tree_deque.emplace_front(state_machine.size() - 2, /* loop back*/
+                               state_machine.size() - 1 /* loop next*/, true);
+
+      for (std::vector<int>::const_reverse_iterator riter =
+               current_node.children.rbegin();
+           riter != current_node.children.rend(); ++riter) {
+        tree_deque.emplace_front(*riter);
+      }
+      // 5
       continue;
       // break;
     case OpCode::RANGE:
@@ -122,6 +154,20 @@ StateMachine buildStateMachineFromTree(const ReTree &tree) {
            riter != current_node.children.rend(); ++riter) {
         tree_deque.emplace_front(*riter);
       }
+      break;
+    case OpCode::WILDCARD:
+      state_machine.states.emplace_back(0);
+      state_machine.at(prev_node_id)
+          .pushTransision(next_node_id,
+                          std::bind(wildcard, std::placeholders::_1));
+      state_machine.at(prev_node_id).pushTransisionLabel(" = . ");
+      break;
+    case OpCode::OPTIONAL:
+      state_machine.states.emplace_back(0);
+      state_machine.at(prev_node_id)
+          .pushTransision(next_node_id,
+                          std::bind(wildcard, std::placeholders::_1));
+      state_machine.at(prev_node_id).pushTransisionLabel(" = . ");
       break;
     default:
       state_machine.states.emplace_back(0);

@@ -39,21 +39,24 @@ class GraphVisualization:
     def visualize(self):
         G = nx.MultiDiGraph()  # MultiDiGraph allows multiple edges between the same nodes
         G.add_edges_from(self.visual)
+        G.add_nodes_from([self.init_node, self.final_node])
         
         if self.init_node >= 0:
             self.node_colors[self.init_node] = self.color_dict['init']
         if self.final_node >= 0 and self.final_node < len(self.node_colors) :
             self.node_colors[self.final_node] = self.color_dict['final']
-
-
-        colors = [(0.5,0.5,0.5) for i in range(len(self.node_colors))]
-
-        for item, color in self.node_colors.items():
-            if item < len(colors):
-                colors[item] = color
-
+        
+        colors = []
         print(colors)
-        print(self.node_colors)
+        for node in G.nodes():
+            print(node)
+            if node == self.init_node:
+                colors.append(self.color_dict['init'])
+            elif node == self.final_node:
+                colors.append(self.color_dict['final'])
+            else:
+                colors.append(self.color_dict['default'])
+
         self.ax.clear()
 
         pos = nx.shell_layout(G)  # Positioning the nodes
