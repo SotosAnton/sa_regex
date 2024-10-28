@@ -26,7 +26,7 @@ inline bool isInRange(char c, char low, char high) {
   return c >= low && c <= high;
 }
 inline bool isLowerCase(char c) { return isInRange(c, 'a', 'b'); }
-inline bool isUpperCase(char c) { return c >= isInRange(c, 'A', 'B'); }
+inline bool isUpperCase(char c) { return isInRange(c, 'A', 'B'); }
 inline bool isDigit(char c) { return isInRange(c, '0', '1'); }
 inline bool isCharecter(char c) { return isLowerCase(c) || isUpperCase(c); }
 inline bool isEqual(char c, char b) { return c == b; }

@@ -76,24 +76,19 @@ void StateMachineBuilder::nodeEntry(const ReNode &current_node,
     // break;
   case OpCode::REPETITION:
 
-    // state_machine.states.back().push_E_transision(next_node_id);
-    // state_machine.states.back().push_E_transision(next_node_id + 1);
-
     state_machine.states.emplace_back(0);
-
-    // state_machine.states.emplace_back(0);
 
     prev_node_id = state_machine.size() - 2;
     next_node_id = prev_node_id;
 
-    tree_deque.emplace_back(state_machine.size() - 2, /* loop back*/
-                            state_machine.size() - 1 /* loop next*/, false);
+    // emplace_back KLEENE_STAR as exit node to close loop
+    tree_deque.emplace_back(build_state.tree_node, state_machine.size() - 1,
+                            false);
 
     for (auto riter = current_node.children.rbegin();
          riter != current_node.children.rend(); ++riter) {
       tree_deque.emplace_back(*riter);
     }
-    // 5
     return;
     // break;
   case OpCode::RANGE:
@@ -114,11 +109,26 @@ void StateMachineBuilder::nodeEntry(const ReNode &current_node,
     state_machine.at(prev_node_id).pushTransisionLabel(" = . ");
     break;
   case OpCode::OPTIONAL:
+
+    // emplace_back OPTIONAL as exit node to close loop
+    tree_deque.emplace_back(build_state.tree_node, state_machine.size() - 1,
+                            false);
+
+    for (auto riter = current_node.children.rbegin();
+         riter != current_node.children.rend(); ++riter) {
+      tree_deque.emplace_back(*riter);
+    }
+
+    break;
+  case OpCode::AT_START:
+
     state_machine.states.emplace_back(0);
-    state_machine.at(prev_node_id)
-        .pushTransision(next_node_id,
-                        std::bind(wildcard, std::placeholders::_1));
-    state_machine.at(prev_node_id).pushTransisionLabel(" = . ");
+
+    for (auto riter = current_node.children.rbegin();
+         riter != current_node.children.rend(); ++riter) {
+      tree_deque.emplace_back(*riter);
+    }
+
     break;
   default:
     state_machine.states.emplace_back(0);
@@ -158,25 +168,6 @@ StateMachine StateMachineBuilder::build() {
                  << static_cast<regex::OpCode>(current_node.content) << " from "
                  << prev_node_id << " to  " << next_node_id << '\n');
 
-    // if (!build_state.entering) {
-    //   DEBUG_STDOUT("Loop back from: " << prev_node_id << " to "
-    //                                   << build_state.state_machine_node
-    //                                   << " empty : " << '\n');
-    //   StateNode &loop_node = state_machine.states.at(prev_node_id);
-
-    //   // Back to start of loop
-    //   // if (build_state.tree_node != 0)
-    //   loop_node.push_E_transision(build_state.tree_node);
-
-    //   // Next state to get out of loop
-
-    //   // if (build_state.state_machine_node != 0)
-    //   loop_node.push_E_transision(build_state.state_machine_node);
-
-    //   prev_node_id = build_state.state_machine_node;
-    //   continue;
-    // }
-
     next_node_id = state_machine.size();
     if (build_state.entering)
       nodeEntry(current_node, build_state, prev_node_id, next_node_id);
@@ -198,14 +189,29 @@ void StateMachineBuilder::nodeExit(const ReNode &current_node,
                << static_cast<regex::OpCode>(current_node.content) << " from "
                << prev_node_id << " to  " << next_node_id << '\n');
 
+  StateNode &loop_node = state_machine.states.at(prev_node_id);
+
   switch (current_node.content) {
   case OpCode::KLEENE_STAR:
-
-    StateNode &loop_node = state_machine.states.at(prev_node_id);
 
     loop_node.push_E_transision(build_state.state_machine_node);
     loop_node.push_E_transision(build_state.state_machine_node + 1);
     prev_node_id = build_state.state_machine_node;
+
+    return;
+
+  case OpCode::REPETITION:
+
+    loop_node.push_E_transision(build_state.state_machine_node);
+    loop_node.push_E_transision(build_state.state_machine_node - 1);
+    prev_node_id = build_state.state_machine_node;
+
+    return;
+
+  case OpCode::OPTIONAL:
+
+    state_machine.states.at(build_state.state_machine_node)
+        .push_E_transision(prev_node_id);
 
     return;
   }

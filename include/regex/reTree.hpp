@@ -15,4 +15,6 @@ ReTree alignTree(const ReTree &tree);
 
 void printReTree(const ReTree &tree);
 
+OpCode parseBackSlash(size_t &index, const std::string &i);
+
 } // namespace regex

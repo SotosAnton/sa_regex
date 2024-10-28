@@ -48,6 +48,24 @@ std::ostream &operator<<(std::ostream &out, const OpCode &value) {
     case OpCode::OPTIONAL:
       out << "?";
       break;
+    case OpCode::WHITESPACE:
+      out << "\\s";
+      break;
+    case OpCode::NON_WHITESPACE:
+      out << "\\S";
+      break;
+    case OpCode::WORD_CHAR:
+      out << "\\w";
+      break;
+    case OpCode::NON_WORD_CHAR:
+      out << "\\W";
+      break;
+    case OpCode::DIGIT:
+      out << "\\d";
+      break;
+    case OpCode::NON_DIGIT:
+      out << "\\D";
+      break;
     }
     out << RESET;
   }

@@ -15,10 +15,12 @@ ReTree parseToTree(const std::string &re_str) {
   tree.nodes.emplace_back(-1, OpCode::ROOT);
 
   int last_node;
-  unsigned i = 0;
+  size_t i = 0;
   while (i < re_str.size()) {
     char c = re_str[i];
     switch (c) {
+    case '\\':
+      tree.push_node(parent_node_stack.top(), parseBackSlash(i, re_str));
     case '^':
       if (i == 0) {
         tree.push_node(parent_node_stack.top(), OpCode::AT_START);
@@ -190,6 +192,59 @@ void printReTree(const ReTree &tree) {
 
     if (current_level != level_stack.front())
       std::cout << '\n';
+  }
+}
+
+OpCode parseBackSlash(size_t &index, const std::string &i) {
+  if (index + 1 >= i.size())
+    return static_cast<OpCode>('\\');
+  // NON_WHITESPACE, // \S
+  // WORD_CHAR,      // \w
+  // NON_WORD_CHAR,  // \W
+  // DIGIT,          // \d
+  // NON_DIGIT,      // \D
+  const char next_char = i[index + 1];
+  index++;
+
+  DEBUG_STDOUT(" backslash : " << next_char << '\n');
+
+  switch (next_char) {
+    // Regex specific codes
+  case 'S':
+    return OpCode::NON_WHITESPACE;
+  case 'w':
+    return OpCode::WORD_CHAR;
+  case 'W':
+    return OpCode::NON_WORD_CHAR;
+  case 'd':
+    return OpCode::DIGIT;
+  case 'D':
+    return OpCode::NON_DIGIT;
+    // general special chars
+  case 'n':
+    return static_cast<OpCode>('\n');
+  case 't':
+    return static_cast<OpCode>('\t');
+  case 'r':
+    return static_cast<OpCode>('\r');
+  case 'b':
+    return static_cast<OpCode>('\b');
+    // Avoid regex specific codes
+  case '*':
+    return static_cast<OpCode>('*');
+  case '.':
+    return static_cast<OpCode>('.');
+  case '\\':
+    return static_cast<OpCode>('\\');
+  case 'x': // Hex
+    throw std::runtime_error("Backslash Hex not implemented\n");
+    return static_cast<OpCode>('.');
+  case 'u': // Unicode
+    throw std::runtime_error("Backslash Unicode not implemented\n");
+    return static_cast<OpCode>('\\');
+
+  default:
+    break;
   }
 }
 
