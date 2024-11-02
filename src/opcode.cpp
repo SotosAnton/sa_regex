@@ -1,4 +1,5 @@
 #include <regex/opcode.hpp>
+#include <sstream>
 
 #define RESET "\033[m"
 #define MAGENTA "\033[35m" /* Magenta */
@@ -70,6 +71,16 @@ std::ostream &operator<<(std::ostream &out, const OpCode &value) {
     out << RESET;
   }
   return out;
+}
+
+std::string OpCode2String(const OpCode value) {
+  std::stringstream out;
+  out << value;
+  return out.str();
+}
+
+std::string OpCode2String(const u_int32_t value) {
+  return OpCode2String(static_cast<OpCode>(value));
 }
 
 } // namespace regex

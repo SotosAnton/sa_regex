@@ -31,6 +31,8 @@ enum OpCode : uint32_t {
 
 };
 
+std::string OpCode2String(const OpCode value);
+std::string OpCode2String(const u_int32_t value);
 // print operator for ReTree content
 std::ostream &operator<<(std::ostream &out, const OpCode &value);
 

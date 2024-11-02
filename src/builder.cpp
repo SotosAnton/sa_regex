@@ -130,6 +130,70 @@ void StateMachineBuilder::nodeEntry(const ReNode &current_node,
     }
 
     break;
+  case OpCode::DIGIT:
+    state_machine.states.emplace_back(0);
+    DEBUG_STDOUT("Add Transision  = "
+                 << static_cast<regex::OpCode>(current_node.content) << " to "
+                 << next_node_id << '\n');
+    state_machine.at(prev_node_id)
+        .pushTransision(next_node_id,
+                        std::bind(isDigit, std::placeholders::_1));
+    state_machine.at(prev_node_id).pushTransisionLabel(" =  \\d ");
+    break;
+  case OpCode::WORD_CHAR:
+    state_machine.states.emplace_back(0);
+    DEBUG_STDOUT("Add Transision  = "
+                 << static_cast<regex::OpCode>(current_node.content) << " to "
+                 << next_node_id << '\n');
+    state_machine.at(prev_node_id)
+        .pushTransision(next_node_id,
+                        std::bind(isWordChar, std::placeholders::_1));
+    state_machine.at(prev_node_id).pushTransisionLabel(" =  \\w ");
+
+    break;
+  case OpCode::NON_DIGIT:
+    state_machine.states.emplace_back(0);
+    DEBUG_STDOUT("Add Transision  = "
+                 << static_cast<regex::OpCode>(current_node.content) << " to "
+                 << next_node_id << '\n');
+    state_machine.at(prev_node_id)
+        .pushTransision(next_node_id,
+                        std::bind(isNotDigit, std::placeholders::_1));
+    state_machine.at(prev_node_id).pushTransisionLabel(" =  \\D ");
+
+    break;
+  case OpCode::NON_WORD_CHAR:
+    state_machine.states.emplace_back(0);
+    DEBUG_STDOUT("Add Transision  = "
+                 << static_cast<regex::OpCode>(current_node.content) << " to "
+                 << next_node_id << '\n');
+    state_machine.at(prev_node_id)
+        .pushTransision(next_node_id,
+                        std::bind(isNotWordChar, std::placeholders::_1));
+    state_machine.at(prev_node_id).pushTransisionLabel(" =  \\W ");
+
+    break;
+  case OpCode::WHITESPACE:
+    state_machine.states.emplace_back(0);
+    DEBUG_STDOUT("Add Transision  = "
+                 << static_cast<regex::OpCode>(current_node.content) << " to "
+                 << next_node_id << '\n');
+    state_machine.at(prev_node_id)
+        .pushTransision(next_node_id,
+                        std::bind(isWhitespace, std::placeholders::_1));
+    state_machine.at(prev_node_id).pushTransisionLabel(" =  \\s ");
+
+  case OpCode::NON_WHITESPACE:
+    state_machine.states.emplace_back(0);
+    DEBUG_STDOUT("Add Transision  = "
+                 << static_cast<regex::OpCode>(current_node.content) << " to "
+                 << next_node_id << '\n');
+    state_machine.at(prev_node_id)
+        .pushTransision(next_node_id,
+                        std::bind(isNotWhitespace, std::placeholders::_1));
+    state_machine.at(prev_node_id).pushTransisionLabel(" =  \\S ");
+
+    break;
   default:
     state_machine.states.emplace_back(0);
     DEBUG_STDOUT("Add Transision  = "
@@ -164,11 +228,12 @@ StateMachine StateMachineBuilder::build() {
 
     size_t next_node_id;
 
+    next_node_id = state_machine.size();
+
     DEBUG_STDOUT("Adding State: "
                  << static_cast<regex::OpCode>(current_node.content) << " from "
                  << prev_node_id << " to  " << next_node_id << '\n');
 
-    next_node_id = state_machine.size();
     if (build_state.entering)
       nodeEntry(current_node, build_state, prev_node_id, next_node_id);
     else
@@ -177,7 +242,9 @@ StateMachine StateMachineBuilder::build() {
     if (next_node_id != state_machine.size())
       prev_node_id = next_node_id;
   }
-  state_machine.final_state = state_machine.size() - 1;
+  state_machine.final_state = prev_node_id;
+  state_machine.at(state_machine.final_state).default_transision =
+      state_machine.final_state;
 
   return std::move(state_machine);
 }

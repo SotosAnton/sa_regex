@@ -44,6 +44,9 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
                                        << input.size() << '\n');
       }
 
+    if (state.input_id >= input.size())
+      throw std::runtime_error("Run state machine input out of bounds error.");
+
     char c = input[state.input_id];
     DEBUG_STDOUT("State: " << state.node_id << " c: " << c)
     auto &node = engine.at(state.node_id);
@@ -51,9 +54,7 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
     bool transision_succes = false;
     for (auto transision : node.transisions) {
 
-      bool eval = transision.func(c);
-      DEBUG_STDOUT(" func eval = " << eval << '\n')
-      if (eval) {
+      if (transision.func(c)) {
         transision_succes = true;
         state.node_id = transision.destination;
         break;
@@ -85,7 +86,7 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
 
   DEBUG_STDOUT(" exec_stack : " << exec_stack.size() << "\n")
 
-  return state.node_id == engine.final_state;
+  return state.node_id == engine.final_state && state.input_id > 0;
 }
 
 } // namespace regex

@@ -31,6 +31,19 @@ set(HEADERS
   include/regex/state_machine.hpp
 )
 
+# if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+#     message("Building with debug flags for bounds-checking")
+#     add_compile_options(
+#         -g                    # Enable debugging symbols
+#         -D_GLIBCXX_DEBUG      # Enable extra STL debug checks
+#         -fstack-protector-all # Protect against stack overflows
+#         -fsanitize=address    # Address sanitizer for memory errors
+#         -fsanitize=undefined  # Detect undefined behavior
+#     )
+#     # Link both address and undefined behavior sanitizers
+#     link_libraries("-fsanitize=address -fsanitize=undefined")
+# endif()
+
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 add_executable(${PROJECT_NAME}_run test.cpp )
 add_executable(${PROJECT_NAME}_test run_tests.cpp )

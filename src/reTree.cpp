@@ -21,6 +21,7 @@ ReTree parseToTree(const std::string &re_str) {
     switch (c) {
     case '\\':
       tree.push_node(parent_node_stack.top(), parseBackSlash(i, re_str));
+      break;
     case '^':
       if (i == 0) {
         tree.push_node(parent_node_stack.top(), OpCode::AT_START);
@@ -93,6 +94,9 @@ ReTree parseToTree(const std::string &re_str) {
       tree.splitNodes(parent_node_stack.top(), last_node, OpCode::REPETITION);
       break;
     case '?':
+      if (tree.nodes.at(parent_node_stack.top()).children.empty())
+        throw std::runtime_error("Regex parse error. Invalid: '?' \n");
+
       last_node = tree.nodes.at(parent_node_stack.top()).children.back();
       tree.splitNodes(parent_node_stack.top(), last_node, OpCode::OPTIONAL);
       break;
@@ -198,11 +202,7 @@ void printReTree(const ReTree &tree) {
 OpCode parseBackSlash(size_t &index, const std::string &i) {
   if (index + 1 >= i.size())
     return static_cast<OpCode>('\\');
-  // NON_WHITESPACE, // \S
-  // WORD_CHAR,      // \w
-  // NON_WORD_CHAR,  // \W
-  // DIGIT,          // \d
-  // NON_DIGIT,      // \D
+
   const char next_char = i[index + 1];
   index++;
 
@@ -232,18 +232,32 @@ OpCode parseBackSlash(size_t &index, const std::string &i) {
     // Avoid regex specific codes
   case '*':
     return static_cast<OpCode>('*');
+  case '(':
+    return static_cast<OpCode>('(');
+  case '[':
+    return static_cast<OpCode>('[');
+  case '{':
+    return static_cast<OpCode>('}');
+  case ')':
+    return static_cast<OpCode>(')');
+  case ']':
+    return static_cast<OpCode>(']');
+  case '}':
+    return static_cast<OpCode>('}');
   case '.':
     return static_cast<OpCode>('.');
   case '\\':
     return static_cast<OpCode>('\\');
   case 'x': // Hex
     throw std::runtime_error("Backslash Hex not implemented\n");
-    return static_cast<OpCode>('.');
+    return static_cast<OpCode>(next_char);
   case 'u': // Unicode
     throw std::runtime_error("Backslash Unicode not implemented\n");
-    return static_cast<OpCode>('\\');
+    return static_cast<OpCode>(next_char);
 
   default:
+    index--;
+    return static_cast<OpCode>('\\');
     break;
   }
 }
