@@ -32,7 +32,7 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
 
   while (state.node_id != engine.final_state) {
 
-    if (state.input_id >= input.size())
+    if (state.input_id >= input.size()) {
       if (exec_stack.empty()) {
         break;
       } else {
@@ -43,6 +43,7 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
                                        << state.input_id + 1 << '/'
                                        << input.size() << '\n');
       }
+    }
 
     if (state.input_id >= input.size())
       throw std::runtime_error("Run state machine input out of bounds error.");
@@ -78,6 +79,9 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
         continue;
       }
     }
+
+    if (state.node_id == engine.final_state)
+      return true;
 
     DEBUG_STDOUT(" next: " << state.node_id << ", " << state.input_id + 1 << '/'
                            << input.size() << '\n');

@@ -67,6 +67,17 @@ std::ostream &operator<<(std::ostream &out, const OpCode &value) {
     case OpCode::NON_DIGIT:
       out << "\\D";
       break;
+    case OpCode::LAZY_KLEENE_STAR:
+      out << "*?";
+      break;
+    case OpCode::LAZY_REPETITION:
+      out << "+?";
+      break;
+    case OpCode::LAZY_COUNT:
+      out << "{}?";
+    case OpCode::LAZY_OPTIONAL:
+      out << "??";
+      break;
     }
     out << RESET;
   }

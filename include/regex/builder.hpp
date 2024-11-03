@@ -37,6 +37,35 @@ private:
   StateMachine state_machine;
   const ReTree *tree;
   std::deque<BuildItem> tree_deque;
+
+  void build_ROOT(const ReNode &current_node, const BuildItem &build_state,
+                  size_t &prev_node_id, size_t &next_node_id);
+
+  void build_BRACKET(const ReNode &current_node, const BuildItem &build_state,
+                     size_t &prev_node_id, size_t &next_node_id);
+
+  void build_KLEENE_STAR(const ReNode &current_node,
+                         const BuildItem &build_state, size_t &prev_node_id,
+                         size_t &next_node_id);
+
+  void build_REPETITION(const ReNode &current_node,
+                        const BuildItem &build_state, size_t &prev_node_id,
+                        size_t &next_node_id);
+
+  void build_RANGE(const ReNode &current_node, const BuildItem &build_state,
+                   size_t &prev_node_id, size_t &next_node_id);
+
+  void build_OPTIONAL(const ReNode &current_node, const BuildItem &build_state,
+                      size_t &prev_node_id, size_t &next_node_id);
+
+  void build_AT_START(const ReNode &current_node, const BuildItem &build_state,
+                      size_t &prev_node_id, size_t &next_node_id);
+
+  void build_simple_node(const ReNode &current_node,
+                         const BuildItem &build_state, size_t &prev_node_id,
+                         size_t &next_node_id,
+                         const regex::TransisionFunction &func,
+                         const std::string &label = "");
 };
 
 } // namespace regex

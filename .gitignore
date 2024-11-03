@@ -1,0 +1,55 @@
+# VSCode specific
+.vscode/
+*.code-workspace
+
+# C++ specific
+*.obj
+*.o
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.cpp.out
+
+**/*.o
+**/*.o.d
+
+# Ignore build directories in the root and subprojects
+**/build/
+**/bin/
+**/dist/
+**/Debug/
+**/Release/
+
+# CMake specific
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# Compiled dynamic libraries
+*.dll
+*.so
+*.dylib
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+*.swo
+*.bak
+*.pyc
+*.pyo
+*.class
+
+# IDE specific files
+.idea/
+*.iml
+
+# Others
+*.DS_Store
+Thumbs.db

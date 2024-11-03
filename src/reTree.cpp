@@ -98,6 +98,21 @@ ReTree parseToTree(const std::string &re_str) {
         throw std::runtime_error("Regex parse error. Invalid: '?' \n");
 
       last_node = tree.nodes.at(parent_node_stack.top()).children.back();
+
+      if (tree.nodes.at(last_node).content == OpCode::REPETITION) {
+        tree.nodes.at(last_node).content = OpCode::LAZY_REPETITION;
+        break;
+      } else if (tree.nodes.at(last_node).content == OpCode::OPTIONAL) {
+        tree.nodes.at(last_node).content = OpCode::LAZY_OPTIONAL;
+        break;
+      } else if (tree.nodes.at(last_node).content == OpCode::COUNT) {
+        tree.nodes.at(last_node).content = OpCode::LAZY_COUNT;
+        break;
+      } else if (tree.nodes.at(last_node).content == OpCode::KLEENE_STAR) {
+        tree.nodes.at(last_node).content = OpCode::LAZY_KLEENE_STAR;
+        break;
+      }
+
       tree.splitNodes(parent_node_stack.top(), last_node, OpCode::OPTIONAL);
       break;
     default:
