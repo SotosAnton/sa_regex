@@ -8,10 +8,10 @@ namespace regex {
 
 using std::to_string;
 
-void StateMachineBuilder::nodeEntry(const ReNode &current_node,
-                                    const BuildItem &build_state,
-                                    size_t &prev_node_id,
-                                    size_t &next_node_id) {
+void StateMachineBuilder::build_Node(const ReNode &current_node,
+                                     const BuildItem &build_state,
+                                     size_t &prev_node_id,
+                                     size_t &next_node_id) {
 
   switch (current_node.content) {
   case OpCode::ROOT:
@@ -110,7 +110,7 @@ StateMachine StateMachineBuilder::build() {
                  << static_cast<regex::OpCode>(current_node.content) << " from "
                  << prev_node_id << " to  " << next_node_id << '\n');
 
-    nodeEntry(current_node, build_state, prev_node_id, next_node_id);
+    build_Node(current_node, build_state, prev_node_id, next_node_id);
 
     if (next_node_id != state_machine.size())
       prev_node_id = next_node_id;
@@ -124,8 +124,8 @@ StateMachine StateMachineBuilder::build() {
 
 void StateMachineBuilder::build_ROOT(const ReNode &current_node,
                                      const BuildItem &build_state,
-                                     size_t &prev_node_id,
-                                     size_t &next_node_id) {
+                                     size_t & /*prev_node_id*/,
+                                     size_t & /*next_node_id*/) {
 #ifdef DEBUG
   if (!build_state.entering)
     throw std::runtime_error("Root node exit.");
@@ -138,7 +138,7 @@ void StateMachineBuilder::build_ROOT(const ReNode &current_node,
 }
 
 void StateMachineBuilder::build_BRACKET(const ReNode &current_node,
-                                        const BuildItem &build_state,
+                                        const BuildItem & /*build_state*/,
                                         size_t &prev_node_id,
                                         size_t &next_node_id) {
   state_machine.states.emplace_back(0);
@@ -233,15 +233,15 @@ void StateMachineBuilder::build_KLEENE_STAR(const ReNode &current_node,
   }
 }
 
-void StateMachineBuilder::build_RANGE(const ReNode &current_node,
-                                      const BuildItem &build_state,
-                                      size_t &prev_node_id,
-                                      size_t &next_node_id) {}
+// void StateMachineBuilder::build_RANGE(const ReNode &current_node,
+//                                       const BuildItem &build_state,
+//                                       size_t &prev_node_id,
+//                                       size_t &next_node_id) {}
 
 void StateMachineBuilder::build_OPTIONAL(const ReNode &current_node,
                                          const BuildItem &build_state,
                                          size_t &prev_node_id,
-                                         size_t &next_node_id) {
+                                         size_t & /*next_node_id */) {
   if (build_state.entering) {
     // emplace_back OPTIONAL as exit node to close loop
     tree_deque.emplace_back(build_state.tree_node, state_machine.size() - 1,
@@ -259,8 +259,8 @@ void StateMachineBuilder::build_OPTIONAL(const ReNode &current_node,
 }
 
 void StateMachineBuilder::build_AT_START(const ReNode &current_node,
-                                         const BuildItem &build_state,
-                                         size_t &prev_node_id,
+                                         const BuildItem & /*build_state*/,
+                                         size_t & /*prev_node_id*/,
                                          size_t &next_node_id) {}
 
 void StateMachineBuilder::build_simple_node(

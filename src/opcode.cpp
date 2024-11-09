@@ -37,6 +37,9 @@ std::ostream &operator<<(std::ostream &out, const OpCode &value) {
     case OpCode::AT_END:
       out << "$";
       break;
+    case OpCode::UNION:
+      out << "|";
+      break;
     case OpCode::RANGE:
       out << "-";
       break;

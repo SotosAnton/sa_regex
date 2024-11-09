@@ -5,21 +5,21 @@
 
 namespace regex {
 
-size_t StateMachine::splitNodes(const size_t origin_id,
-                                const size_t destination_id,
-                                const size_t default_transision) {
+// size_t StateMachine::splitNodes(const size_t origin_id,
+//                                 const size_t destination_id,
+//                                 const size_t default_transision) {
 
-  StateNode &origin = states.at(origin_id);
-  StateNode &destination = states.at(destination_id);
+//   StateNode &origin = states.at(origin_id);
+//   StateNode &destination = states.at(destination_id);
 
-  states.emplace_back(default_transision);
-  size_t new_destination = states.size() - 1;
+//   states.emplace_back(default_transision);
+//   size_t new_destination = states.size() - 1;
 
-  for (auto &transision : origin.transisions) {
-    if (transision.destination == destination_id)
-      transision.destination = new_destination;
-  }
-}
+//   for (auto &transision : origin.transisions) {
+//     if (transision.destination == destination_id)
+//       transision.destination = new_destination;
+//   }
+// }
 
 bool runStateMachine(const StateMachine &engine, const std::string &input) {
 

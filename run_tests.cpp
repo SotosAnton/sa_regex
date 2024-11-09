@@ -11,7 +11,9 @@ using json = nlohmann::json;
 
 int main(int argc, const char *argv[]) {
   std::string test_case_file = "../tests/test_set_1.json";
+  std::string report_file = "../tests/report_test_set_1.json";
   std::ifstream fh(test_case_file);
+  std::ofstream out_fh(report_file);
 
   auto data = json::parse(fh);
 
@@ -50,8 +52,7 @@ int main(int argc, const char *argv[]) {
         case_save = &match_case;
         total++;
         if (!regex::runStateMachine(engine, match_case))
-          std::cout << " Re:" << re << " false Negative : " << match_case
-                    << '\n';
+          out_fh << " Re:" << re << " false Negative : " << match_case << '\n';
         else
           pass++;
       }
@@ -60,8 +61,7 @@ int main(int argc, const char *argv[]) {
         case_save = &skip_case;
         total++;
         if (regex::runStateMachine(engine, skip_case))
-          std::cout << " Re:" << re << " False Positive : " << skip_case
-                    << '\n';
+          out_fh << " Re:" << re << " False Positive : " << skip_case << '\n';
         else
           pass++;
       }
@@ -83,5 +83,8 @@ int main(int argc, const char *argv[]) {
     }
   }
 
+  out_fh << "Test Result: " << pass << '/' << total << '\n';
   std::cout << "Test Result: " << pass << '/' << total << '\n';
+
+  out_fh.close();
 }

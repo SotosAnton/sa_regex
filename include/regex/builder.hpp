@@ -28,11 +28,8 @@ public:
   };
 
 private:
-  void nodeEntry(const ReNode &current_node, const BuildItem &build_state,
-                 size_t &prev_node_id, size_t &next_node_id);
-
-  void nodeExit(const ReNode &current_node, const BuildItem &build_state,
-                size_t &prev_node_id, size_t &next_node_id);
+  void build_Node(const ReNode &current_node, const BuildItem &build_state,
+                  size_t &prev_node_id, size_t &next_node_id);
 
   StateMachine state_machine;
   const ReTree *tree;
@@ -52,8 +49,8 @@ private:
                         const BuildItem &build_state, size_t &prev_node_id,
                         size_t &next_node_id);
 
-  void build_RANGE(const ReNode &current_node, const BuildItem &build_state,
-                   size_t &prev_node_id, size_t &next_node_id);
+  // void build_RANGE(const ReNode &current_node, const BuildItem &build_state,
+  //                  size_t &prev_node_id, size_t &next_node_id);
 
   void build_OPTIONAL(const ReNode &current_node, const BuildItem &build_state,
                       size_t &prev_node_id, size_t &next_node_id);
