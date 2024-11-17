@@ -23,43 +23,36 @@ namespace regex {
 
 bool runStateMachine(const StateMachine &engine, const std::string &input) {
 
-  MachineState state(engine.start_state, 0);
+  // MachineState state(engine.start_state, 0);
   std::stack<MachineState> exec_stack;
+  exec_stack.emplace(MachineState(engine.start_state, 0));
 
-  DEBUG_STDOUT("Start run from: " << state.node_id
+  DEBUG_STDOUT("Start run from: " << engine.start_state
                                   << " Final: " << engine.final_state << '\n');
   DEBUG_STDOUT(" Input:" << input << '\n')
 
-  while (state.node_id != engine.final_state) {
+  while (!exec_stack.empty()) {
 
-    if (state.input_id >= input.size()) {
-      if (exec_stack.empty()) {
-        break;
-      } else {
+    MachineState state = exec_stack.top();
+    exec_stack.pop();
 
-        state = exec_stack.top();
-        exec_stack.pop();
-        DEBUG_STDOUT(" recover next: " << state.node_id << ", "
-                                       << state.input_id + 1 << '/'
-                                       << input.size() << '\n');
-      }
-    }
-
-    if (state.input_id >= input.size())
-      throw std::runtime_error("Run state machine input out of bounds error.");
-
-    char c = input[state.input_id];
-    DEBUG_STDOUT("State: " << state.node_id << " c: " << c)
+    DEBUG_STDOUT("State: " << state.node_id)
     auto &node = engine.at(state.node_id);
-    node.state = state.input_id;
-    bool transision_succes = false;
-    for (auto transision : node.transisions) {
 
-      if (transision.func(c)) {
-        transision_succes = true;
-        state.node_id = transision.destination;
-        state.input_id++;
-        break;
+    if (state.input_id < input.size()) {
+
+      char c = input[state.input_id];
+
+      DEBUG_STDOUT(" Input : " << state.node_id << " c: " << c << '\n')
+
+      // node.state = state.input_id;
+      bool transision_succes = false;
+      for (auto transision : node.transisions) {
+        if (transision.func(c)) {
+          exec_stack.emplace(transision.destination, state.input_id + 1);
+          DEBUG_STDOUT(" Valid = " << transision.destination << " "
+                                   << state.input_id + 1 << '\n');
+        }
       }
     }
 
@@ -68,32 +61,28 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
       exec_stack.emplace(transision, state.input_id);
     }
 
-    if (!transision_succes) {
-      if (exec_stack.empty()) {
-        state.node_id = node.default_transision;
-      } else {
+    // if (!transision_succes) {
+    //   if (exec_stack.empty()) {
+    //     state.node_id = node.default_transision;
+    //   } else {
 
-        auto recovery_state = exec_stack.top();
-        exec_stack.pop();
-        state.node_id = recovery_state.node_id;
-        state.input_id = recovery_state.input_id;
-        DEBUG_STDOUT(" pop e = " << recovery_state.node_id << " "
-                                 << recovery_state.input_id << '\n');
-        continue;
-      }
-    }
+    //     auto recovery_state = exec_stack.top();
+    //     exec_stack.pop();
+    //     state.node_id = recovery_state.node_id;
+    //     state.input_id = recovery_state.input_id;
+    //     DEBUG_STDOUT(" pop e = " << recovery_state.node_id << " "
+    //                              << recovery_state.input_id << '\n');
+    //     continue;
+    //   }
+    // }
 
     if (state.node_id == engine.final_state)
       return true;
-
-    DEBUG_STDOUT(" next: " << state.node_id << ", " << state.input_id + 1 << '/'
-                           << input.size() << '\n');
-    // state.input_id++;
   }
 
   DEBUG_STDOUT(" exec_stack : " << exec_stack.size() << "\n")
 
-  return state.node_id == engine.final_state && state.input_id > 0;
+  return false;
 }
 
 } // namespace regex
