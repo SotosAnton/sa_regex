@@ -63,7 +63,7 @@ ReTree parseToTree(const std::string &re_str) {
         parent_node_stack.pop();
 
       } else if (tree.nodes.at(parent_node_stack.top()).content ==
-                 OpCode::UNION) {
+                 OpCode::UNION_SUBEXPRESION) {
         parent_node_stack.pop();
         parent_node_stack.pop();
 
@@ -105,12 +105,12 @@ ReTree parseToTree(const std::string &re_str) {
 
       // Special case to avoid nesting union nodes
       if (tree.getNodeContent(parent_node_stack.top()) ==
-          OpCode::SUBEXPRESSION) {
+          OpCode::UNION_SUBEXPRESION) {
         auto temp_top = parent_node_stack.top();
         parent_node_stack.pop();
         if (!parent_node_stack.empty() &&
             tree.getNodeContent(parent_node_stack.top()) == OpCode::UNION) {
-          tree.push_node(parent_node_stack.top(), OpCode::SUBEXPRESSION);
+          tree.push_node(parent_node_stack.top(), OpCode::UNION_SUBEXPRESION);
           parent_node_stack.push(temp_top);
           parent_node_stack.push(tree.size() - 1);
           break;
@@ -118,10 +118,10 @@ ReTree parseToTree(const std::string &re_str) {
         parent_node_stack.push(temp_top);
       }
 
-      tree.rebaseNode(parent_node_stack.top(), OpCode::SUBEXPRESSION);
+      tree.rebaseNode(parent_node_stack.top(), OpCode::UNION_SUBEXPRESION);
       tree.splitNodes(parent_node_stack.top(), tree.size() - 1, OpCode::UNION);
       parent_node_stack.push(tree.size() - 1);
-      tree.push_node(parent_node_stack.top(), OpCode::SUBEXPRESSION);
+      tree.push_node(parent_node_stack.top(), OpCode::UNION_SUBEXPRESION);
       parent_node_stack.push(tree.size() - 1);
 
       break;

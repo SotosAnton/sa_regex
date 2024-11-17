@@ -39,6 +39,13 @@ void StateMachineBuilder::build_Node(const ReNode &current_node,
   case OpCode::OPTIONAL:
     build_OPTIONAL(current_node, build_state, prev_node_id, next_node_id);
     break;
+  case OpCode::UNION:
+    build_UNION(current_node, build_state, prev_node_id, next_node_id);
+    break;
+  case OpCode::UNION_SUBEXPRESION:
+    build_UNION_SUBEXPRESION(current_node, build_state, prev_node_id,
+                             next_node_id);
+    break;
   case OpCode::AT_START:
 
     state_machine.states.emplace_back(0);
@@ -262,6 +269,59 @@ void StateMachineBuilder::build_AT_START(const ReNode &current_node,
                                          const BuildItem & /*build_state*/,
                                          size_t & /*prev_node_id*/,
                                          size_t &next_node_id) {}
+
+void StateMachineBuilder::build_UNION(const ReNode &current_node,
+                                      const BuildItem &build_state,
+                                      size_t &prev_node_id,
+                                      size_t &next_node_id) {
+  if (build_state.entering) {
+
+    state_machine.states.emplace_back(0);
+    // emplace_back UNION as exit node to close loop
+    tree_deque.emplace_back(build_state.tree_node, state_machine.size() - 1,
+                            false);
+
+    for (auto riter = current_node.children.rbegin();
+         riter != current_node.children.rend(); ++riter) {
+      // state_/machine.at(prev_node_id)
+      // .push_E_transision(state_machine.size() - 1);
+      tree_deque.emplace_back(*riter, state_machine.size() - 1, true);
+    }
+  } else {
+
+    prev_node_id = build_state.state_machine_node;
+  }
+}
+
+void StateMachineBuilder::build_UNION_SUBEXPRESION(const ReNode &current_node,
+                                                   const BuildItem &build_state,
+                                                   size_t &prev_node_id,
+                                                   size_t &next_node_id) {
+  if (build_state.entering) {
+
+    // emplace_back UNION as exit node to close loop
+    state_machine.states.emplace_back(0);
+    state_machine.states.at(build_state.state_machine_node - 1)
+        .push_E_transision(state_machine.size() - 1);
+
+    tree_deque.emplace_back(build_state.tree_node,
+                            build_state.state_machine_node, false);
+    prev_node_id = build_state.state_machine_node - 1;
+
+    // state_machine.states.at(build_state.state_machine_node)
+    //     .push_E_transision(prev_node_id);
+
+    for (auto riter = current_node.children.rbegin();
+         riter != current_node.children.rend(); ++riter) {
+      tree_deque.emplace_back(*riter, prev_node_id, true);
+    }
+  } else {
+
+    state_machine.states.at(prev_node_id)
+        .push_E_transision(build_state.state_machine_node);
+    prev_node_id = build_state.state_machine_node;
+  }
+}
 
 void StateMachineBuilder::build_simple_node(
     const ReNode &current_node, const BuildItem &build_state,

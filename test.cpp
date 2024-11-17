@@ -27,10 +27,11 @@ int main(int argc, const char *argv[]) {
   auto engine = regex::buildStateMachineFromTree(tree);
 
   std::cout << " Save : "
-            << regex::writeMachineDescriptionToFile("engine.txt", engine)
+            << regex::writeMachineDescriptionToFile("../engine.txt", engine)
             << '\n';
 
-  std::cout << " Run : " << regex::runStateMachine(engine, input) << '\n';
+  bool res = regex::runStateMachine(engine, input);
+  std::cout << " \n Run : " << res << '\n';
 
   return 0;
 }

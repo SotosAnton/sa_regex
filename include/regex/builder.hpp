@@ -58,6 +58,13 @@ private:
   void build_AT_START(const ReNode &current_node, const BuildItem &build_state,
                       size_t &prev_node_id, size_t &next_node_id);
 
+  void build_UNION(const ReNode &current_node, const BuildItem &build_state,
+                   size_t &prev_node_id, size_t &next_node_id);
+
+  void build_UNION_SUBEXPRESION(const ReNode &current_node,
+                                const BuildItem &build_state,
+                                size_t &prev_node_id, size_t &next_node_id);
+
   void build_simple_node(const ReNode &current_node,
                          const BuildItem &build_state, size_t &prev_node_id,
                          size_t &next_node_id,

@@ -58,12 +58,15 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
       if (transision.func(c)) {
         transision_succes = true;
         state.node_id = transision.destination;
+        state.input_id++;
         break;
       }
     }
 
-    for (auto transision : node.e_transisions)
+    for (auto transision : node.e_transisions) {
+      DEBUG_STDOUT(" push e = " << transision << " " << state.input_id << '\n');
       exec_stack.emplace(transision, state.input_id);
+    }
 
     if (!transision_succes) {
       if (exec_stack.empty()) {
@@ -85,7 +88,7 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
 
     DEBUG_STDOUT(" next: " << state.node_id << ", " << state.input_id + 1 << '/'
                            << input.size() << '\n');
-    state.input_id++;
+    // state.input_id++;
   }
 
   DEBUG_STDOUT(" exec_stack : " << exec_stack.size() << "\n")
