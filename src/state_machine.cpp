@@ -7,17 +7,17 @@ namespace regex {
 
 // size_t StateMachine::splitNodes(const size_t origin_id,
 //                                 const size_t destination_id,
-//                                 const size_t default_transision) {
+//                                 const size_t default_transition) {
 
 //   StateNode &origin = states.at(origin_id);
 //   StateNode &destination = states.at(destination_id);
 
-//   states.emplace_back(default_transision);
+//   states.emplace_back(default_transition);
 //   size_t new_destination = states.size() - 1;
 
-//   for (auto &transision : origin.transisions) {
-//     if (transision.destination == destination_id)
-//       transision.destination = new_destination;
+//   for (auto &transition : origin.transitions) {
+//     if (transition.destination == destination_id)
+//       transition.destination = new_destination;
 //   }
 // }
 
@@ -39,31 +39,45 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
     DEBUG_STDOUT("State: " << state.node_id)
     auto &node = engine.at(state.node_id);
 
+    bool transisition_success = false;
+
     if (state.input_id < input.size()) {
 
       char c = input[state.input_id];
 
       DEBUG_STDOUT(" Input : " << state.node_id << " c: " << c << '\n')
 
+      // trap node
+      if (node.transitions.empty() && node.e_transitions.empty()) {
+        if (state.node_id == engine.final_state)
+          return true;
+        else
+          return false;
+      }
+
       // node.state = state.input_id;
-      bool transision_succes = false;
-      for (auto transision : node.transisions) {
-        if (transision.func(c)) {
-          exec_stack.emplace(transision.destination, state.input_id + 1);
-          DEBUG_STDOUT(" Valid = " << transision.destination << " "
+      for (auto transition : node.transitions) {
+        if (transition.func(c)) {
+          exec_stack.emplace(transition.destination, state.input_id + 1);
+          transisition_success = true;
+          DEBUG_STDOUT(" Valid = " << transition.destination << " "
                                    << state.input_id + 1 << '\n');
         }
       }
     }
 
-    for (auto transision : node.e_transisions) {
-      DEBUG_STDOUT(" push e = " << transision << " " << state.input_id << '\n');
-      exec_stack.emplace(transision, state.input_id);
+    for (auto transition : node.e_transitions) {
+      DEBUG_STDOUT(" push e = " << transition << " " << state.input_id << '\n');
+      exec_stack.emplace(transition, state.input_id);
+      transisition_success = true;
     }
 
-    // if (!transision_succes) {
+    if (!transisition_success && (state.input_id + 1) < input.size())
+      exec_stack.emplace(node.default_transition, state.input_id + 1);
+
+    // if (!transition_succes) {
     //   if (exec_stack.empty()) {
-    //     state.node_id = node.default_transision;
+    //     state.node_id = node.default_transition;
     //   } else {
 
     //     auto recovery_state = exec_stack.top();

@@ -16,22 +16,22 @@ std::string generateStateMachineDescription(const StateMachine &engine) {
     if (i == engine.final_state)
       output << "f:" << to_string(i) << '\n';
 
-    for (auto &transision : current_node.transisions) {
+    for (auto &transition : current_node.transitions) {
 
-      output << to_string(i) << " -> " << to_string(transision.destination);
-      if (!transision.label.empty())
-        output << " [" << transision.label << "]";
+      output << to_string(i) << " -> " << to_string(transition.destination);
+      if (!transition.label.empty())
+        output << " [" << transition.label << "]";
       output << '\n';
     }
 
-    for (auto &transision : current_node.e_transisions) {
-      output << to_string(i) << " -> " << to_string(transision) << " [e]"
+    for (auto &transition : current_node.e_transitions) {
+      output << to_string(i) << " -> " << to_string(transition) << " [e]"
              << '\n';
     }
 
-    if (current_node.default_transision != engine.start_state) {
+    if (current_node.default_transition != engine.start_state) {
       output << to_string(i) << " -> "
-             << to_string(current_node.default_transision) << " ["
+             << to_string(current_node.default_transition) << " ["
              << " d "
              << "]";
       output << '\n';

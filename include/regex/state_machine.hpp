@@ -6,19 +6,22 @@
 namespace regex {
 
 typedef std::function<bool /* next_state */ (u_int32_t /* content */)>
-    TransisionFunction;
+    TransitionFunction;
 
-struct Transision {
+struct Transition {
 
-  Transision(const size_t destination, const TransisionFunction &func)
-      : func(func), destination(destination) {}
-
-  Transision(const size_t destination, const TransisionFunction &&func)
+  Transition(const size_t destination, const TransitionFunction &func)
       : func(func), destination(destination) {}
 
   std::string label; /* TODO: only use in debug*/
-  TransisionFunction func;
+  TransitionFunction func;
   size_t destination;
+};
+
+struct CountedTransition : public Transition {
+
+  CountedTransition(const size_t destination, const TransitionFunction &func)
+      : Transition(destination, func) {}
 };
 
 struct MachineState {
@@ -29,34 +32,29 @@ struct MachineState {
 };
 
 struct StateNode {
-  std::vector<Transision> transisions;
-  size_t default_transision = 0;
+  std::vector<Transition> transitions;
+  size_t default_transition = 0;
 
-  std::vector<size_t> e_transisions;
+  std::vector<size_t> e_transitions;
 
   mutable size_t state; /* TODO: Remove mutable*/
 
-  StateNode(const size_t default_transision)
-      : default_transision(default_transision) {}
+  StateNode(const size_t default_transition)
+      : default_transition(default_transition) {}
 
-  StateNode() : default_transision(0) {}
+  StateNode() : default_transition(0) {}
 
-  void push_E_transision(const size_t destination) {
-    e_transisions.push_back(destination);
+  void push_E_transition(const size_t destination) {
+    e_transitions.push_back(destination);
   }
 
-  void pushTransision(const size_t destination,
-                      const TransisionFunction &func) {
-    transisions.emplace_back(destination, func);
+  void pushTransition(const size_t destination,
+                      const TransitionFunction &func) {
+    transitions.emplace_back(destination, func);
   }
 
-  void pushTransision(const size_t destination,
-                      const TransisionFunction &&func) {
-    transisions.emplace_back(destination, func);
-  }
-
-  void pushTransisionLabel(const std::string &label) {
-    transisions.back().label = label;
+  void pushTransitionLabel(const std::string &label) {
+    transitions.back().label = label;
   }
 };
 
@@ -69,7 +67,7 @@ struct StateMachine {
   StateNode &at(size_t i) { return states.at(i); }
   const StateNode &at(size_t i) const { return states.at(i); }
   // size_t splitNodes(const size_t origin, const size_t destination,
-  //                   const size_t default_transision);
+  //                   const size_t default_transition);
 
   std::vector<StateNode> states;
   size_t start_state;

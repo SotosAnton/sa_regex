@@ -40,6 +40,9 @@ std::ostream &operator<<(std::ostream &out, const OpCode &value) {
     case OpCode::UNION:
       out << "|";
       break;
+    case OpCode::COUNT:
+      out << "{}";
+      break;
     case OpCode::UNION_SUBEXPRESION:
       out << "(|)";
       break;

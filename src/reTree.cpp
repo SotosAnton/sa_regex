@@ -40,7 +40,7 @@ ReTree parseToTree(const std::string &re_str) {
       parent_node_stack.push(tree.size() - 1);
       break;
     case ']':
-      if (tree.nodes.empty() ||
+      if (parent_node_stack.empty() ||
           (tree.nodes.at(parent_node_stack.top()).content != OpCode::BRACKET &&
            tree.nodes.at(parent_node_stack.top()).content !=
                OpCode::INV_BRACKET)) {
@@ -54,10 +54,8 @@ ReTree parseToTree(const std::string &re_str) {
       parent_node_stack.push(tree.size() - 1);
       break;
     case ')':
-      if (tree.nodes.empty()) {
-        throw std::runtime_error(
-            "Paranthesis Missmatch :" +
-            tree.nodes.at(parent_node_stack.top()).content);
+      if (parent_node_stack.empty()) {
+        throw std::runtime_error("Paranthesis Missmatch :" + c);
       } else if (tree.nodes.at(parent_node_stack.top()).content ==
                  OpCode::SUBEXPRESSION) {
         parent_node_stack.pop();
@@ -65,6 +63,27 @@ ReTree parseToTree(const std::string &re_str) {
       } else if (tree.nodes.at(parent_node_stack.top()).content ==
                  OpCode::UNION_SUBEXPRESION) {
         parent_node_stack.pop();
+        parent_node_stack.pop();
+
+      } else {
+        throw std::runtime_error(
+            "Paranthesis Missmatch :" +
+            tree.nodes.at(parent_node_stack.top()).content);
+      }
+
+      break;
+    case '{':
+
+      last_node = tree.nodes.at(parent_node_stack.top()).children.back();
+      tree.splitNodes(parent_node_stack.top(), last_node, OpCode::COUNT);
+
+      parent_node_stack.push(tree.size() - 1);
+      break;
+    case '}':
+      if (parent_node_stack.empty()) {
+        throw std::runtime_error("Paranthesis Missmatch :" + c);
+      } else if (tree.nodes.at(parent_node_stack.top()).content ==
+                 OpCode::COUNT) {
         parent_node_stack.pop();
 
       } else {
@@ -235,9 +254,9 @@ void printReTree(const ReTree &tree) {
       throw std::runtime_error(
           "Tree Parse error: Tree contains cyrcle. Index :" +
           std::to_string(current_node_id));
-#endif
 
     visited[current_node_id] = true;
+#endif
 
     int current_level = level_stack.front();
 
