@@ -20,12 +20,17 @@ int main(int argc, const char *argv[]) {
   int pass = 0;
   int total = 0;
 
+  bool verbose = true;
+
   for (auto &test_case : data) {
+
     std::string re = test_case.at("re").get<std::string>();
     std::vector<std::string> match =
         test_case.at("match").get<std::vector<std::string>>();
     std::vector<std::string> skip =
         test_case.at("skip").get<std::vector<std::string>>();
+
+    std::cout << "Testing re : " << re << "\n";
 
     regex::StateMachine engine;
     regex::ReTree tree;
@@ -49,6 +54,9 @@ int main(int argc, const char *argv[]) {
 
     try {
       for (auto &match_case : match) {
+        if (verbose)
+          std::cout << "Match case : " << match_case << "\n";
+
         case_save = &match_case;
         total++;
         if (!regex::runStateMachine(engine, match_case))
@@ -58,6 +66,9 @@ int main(int argc, const char *argv[]) {
       }
 
       for (auto &skip_case : skip) {
+        if (verbose)
+          std::cout << "Skip case : " << skip_case << "\n";
+
         case_save = &skip_case;
         total++;
         if (regex::runStateMachine(engine, skip_case))

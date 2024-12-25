@@ -83,6 +83,15 @@ ReTree parseToTree(const std::string &re_str) {
       if (parent_node_stack.empty()) {
         throw std::runtime_error("Paranthesis Missmatch :" + c);
       } else if (tree.nodes.at(parent_node_stack.top()).content ==
+                 OpCode::RANGE) {
+        parent_node_stack.pop();
+        if (!parent_node_stack.empty() &&
+            tree.nodes.at(parent_node_stack.top()).content == OpCode::COUNT) {
+          parent_node_stack.pop();
+        } else {
+          throw std::runtime_error("Range in count Missmatch :" + c);
+        }
+      } else if (tree.nodes.at(parent_node_stack.top()).content ==
                  OpCode::COUNT) {
         parent_node_stack.pop();
 

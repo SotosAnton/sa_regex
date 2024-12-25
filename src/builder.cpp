@@ -11,22 +11,21 @@ using std::to_string;
 #define BUILD_MAP_ITEM(code, func)                                             \
   {                                                                            \
     code, [](StateMachineBuilder *self, const ReNode &node,                    \
-             const BuildItem &state, size_t &prev,                             \
-             size_t &next) { self->func(node, state, prev, next); }            \
+             const BuildItem &state) { self->func(node, state); }              \
   }
 
-#define BUILD_MAP_TROW(code)                                                   \
+#define BUILD_MAP_THROW(code)                                                  \
   {                                                                            \
-    code,                                                                      \
-        [](StateMachineBuilder *, const ReNode &, const BuildItem &, size_t &, \
-           size_t &) { throw std::runtime_error("Invalid Opcode: " #code); }   \
+    code, [](StateMachineBuilder *, const ReNode &, const BuildItem &) {       \
+      throw std::runtime_error("Invalid Opcode: " #code);                      \
+    }                                                                          \
   }
 
 #define BUILD_MAP_ITEM_SIMPLE(code, func, label)                               \
   {                                                                            \
     code, [](StateMachineBuilder *self, const ReNode &node,                    \
-             const BuildItem &state, size_t &prev, size_t &next) {             \
-      self->build_simple_node(node, state, prev, next,                         \
+             const BuildItem &state) {                                         \
+      self->build_simple_node(node, state,                                     \
                               std::bind(func, std::placeholders::_1), label);  \
     }                                                                          \
   }
@@ -43,7 +42,7 @@ const std::unordered_map<OpCode, StateMachineBuilder::BuildFunction>
         BUILD_MAP_ITEM(OpCode::UNION_SUBEXPRESION, build_UNION_SUBEXPRESION),
         BUILD_MAP_ITEM(OpCode::AT_START, build_AT_START),
         BUILD_MAP_ITEM(OpCode::AT_END, build_AT_END),
-        BUILD_MAP_ITEM(OpCode::AT_END, build_AT_END),
+        BUILD_MAP_ITEM(OpCode::COUNT, build_COUNT),
         BUILD_MAP_ITEM_SIMPLE(OpCode::WILDCARD, wildcard, " =  . "),
         BUILD_MAP_ITEM_SIMPLE(OpCode::DIGIT, isDigit, " =  \\d "),
         BUILD_MAP_ITEM_SIMPLE(OpCode::WORD_CHAR, isWordChar, " =  \\w "),
@@ -52,22 +51,20 @@ const std::unordered_map<OpCode, StateMachineBuilder::BuildFunction>
         BUILD_MAP_ITEM_SIMPLE(OpCode::WHITESPACE, isWhitespace, " =  \\s "),
         BUILD_MAP_ITEM_SIMPLE(OpCode::NON_WHITESPACE, isNotWhitespace,
                               " =  \\S "),
-        BUILD_MAP_TROW(OpCode::RANGE),
+        BUILD_MAP_THROW(OpCode::RANGE),
 
 };
 
 void StateMachineBuilder::build_Node(const ReNode &current_node,
-                                     const BuildItem &build_state,
-                                     size_t &prev_node_id,
-                                     size_t &next_node_id) {
+                                     const BuildItem &build_state) {
   auto search = build_map.find(static_cast<OpCode>(current_node.content));
   if (search == build_map.end()) {
     build_simple_node(
-        current_node, build_state, prev_node_id, next_node_id,
+        current_node, build_state,
         std::bind(isEqual, std::placeholders::_1, current_node.content),
         " = " + std::string(1, static_cast<char>(current_node.content)));
   } else {
-    search->second(this, current_node, build_state, prev_node_id, next_node_id);
+    search->second(this, current_node, build_state);
   }
 }
 
@@ -79,7 +76,7 @@ StateMachine StateMachineBuilder::build() {
 
   tree_deque.emplace_back(tree->start_node);
 
-  size_t prev_node_id = 0;
+  prev_node_id = 0;
 
   while (!tree_deque.empty()) {
 
@@ -88,18 +85,20 @@ StateMachine StateMachineBuilder::build() {
 
     const ReNode &current_node = tree->getNode(build_state.tree_node);
 
-    size_t next_node_id;
+    // size_t next_node_id;
 
-    next_node_id = state_machine.size();
+    // next_node_id = state_machine.size();
 
-    DEBUG_STDOUT("Adding State: "
-                 << static_cast<regex::OpCode>(current_node.content) << " from "
-                 << prev_node_id << " to  " << next_node_id << '\n');
+    DEBUG_STDOUT((build_state.entering ? "Enter" : "Exit")
+                 << " state: "
+                 << static_cast<regex::OpCode>(current_node.content)
+                 << '\n'); // " from "
+    //  << prev_node_id << " to  " << next_node_id << '\n');
 
-    build_Node(current_node, build_state, prev_node_id, next_node_id);
+    build_Node(current_node, build_state);
 
-    if (next_node_id != state_machine.size())
-      prev_node_id = next_node_id;
+    // if (next_node_id != state_machine.size())
+    prev_node_id = state_machine.size() - 1;
   }
   state_machine.final_state = prev_node_id;
   state_machine.at(state_machine.final_state).default_transition =
@@ -109,9 +108,7 @@ StateMachine StateMachineBuilder::build() {
 }
 
 void StateMachineBuilder::build_ROOT(const ReNode &current_node,
-                                     const BuildItem &build_state,
-                                     size_t & /*prev_node_id*/,
-                                     size_t & /*next_node_id*/) {
+                                     const BuildItem &build_state) {
 #ifdef DEBUG
   if (!build_state.entering)
     throw std::runtime_error("Root node exit.");
@@ -124,9 +121,7 @@ void StateMachineBuilder::build_ROOT(const ReNode &current_node,
 }
 
 void StateMachineBuilder::build_BRACKET(const ReNode &current_node,
-                                        const BuildItem & /*build_state*/,
-                                        size_t &prev_node_id,
-                                        size_t &next_node_id) {
+                                        const BuildItem &build_state) {
   state_machine.states.emplace_back(0);
   for (unsigned child_id : current_node.children) {
     const ReNode &child_node = tree->getNode(child_id);
@@ -136,7 +131,7 @@ void StateMachineBuilder::build_BRACKET(const ReNode &current_node,
 
       state_machine.at(prev_node_id)
           .pushTransition(
-              next_node_id,
+              state_machine.size() - 1,
               std::bind(isInRange, std::placeholders::_1, r_min, r_max));
 
       state_machine.at(prev_node_id)
@@ -146,7 +141,7 @@ void StateMachineBuilder::build_BRACKET(const ReNode &current_node,
     } else {
       state_machine.at(prev_node_id)
           .pushTransition(
-              next_node_id,
+              state_machine.size() - 1,
               std::bind(isEqual, std::placeholders::_1, child_node.content));
       state_machine.at(prev_node_id)
           .pushTransitionLabel(
@@ -156,14 +151,34 @@ void StateMachineBuilder::build_BRACKET(const ReNode &current_node,
 }
 
 void StateMachineBuilder::build_REPETITION(const ReNode &current_node,
-                                           const BuildItem &build_state,
-                                           size_t &prev_node_id,
-                                           size_t &next_node_id) {
+                                           const BuildItem &build_state) {
   if (build_state.entering) {
+
+    tree_deque.emplace_back(build_state.tree_node, state_machine.size() - 1,
+                            false);
+
+    for (auto riter = current_node.children.rbegin();
+         riter != current_node.children.rend(); ++riter) {
+      tree_deque.emplace_back(*riter);
+    }
+
+  } else {
+
+    StateNode &loop_node = state_machine.states.at(state_machine.size() - 1);
+    loop_node.push_E_transition(build_state.state_machine_node);
+    loop_node.push_E_transition(state_machine.size());
     state_machine.states.emplace_back(0);
 
-    prev_node_id = state_machine.size() - 2;
-    next_node_id = prev_node_id;
+    prev_node_id = build_state.state_machine_node;
+  }
+}
+
+void StateMachineBuilder::build_KLEENE_STAR(const ReNode &current_node,
+                                            const BuildItem &build_state) {
+  if (build_state.entering) {
+
+    state_machine.states.back().push_E_transition(state_machine.size());
+    state_machine.states.emplace_back(0);
 
     // emplace_back KLEENE_STAR as exit node to close loop
     tree_deque.emplace_back(build_state.tree_node, state_machine.size() - 1,
@@ -177,57 +192,22 @@ void StateMachineBuilder::build_REPETITION(const ReNode &current_node,
   } else {
 
     StateNode &loop_node = state_machine.states.at(prev_node_id);
-    loop_node.push_E_transition(build_state.state_machine_node);
-    loop_node.push_E_transition(build_state.state_machine_node - 1);
-    prev_node_id = build_state.state_machine_node;
-  }
-}
-
-void StateMachineBuilder::build_KLEENE_STAR(const ReNode &current_node,
-                                            const BuildItem &build_state,
-                                            size_t &prev_node_id,
-                                            size_t &next_node_id) {
-  if (build_state.entering) {
-
-    state_machine.states.back().push_E_transition(next_node_id);
-    state_machine.states.back().push_E_transition(next_node_id + 1);
 
     state_machine.states.emplace_back(0);
+    loop_node.push_E_transition(state_machine.size() - 1);
 
-    state_machine.states.emplace_back(0);
-
-    prev_node_id = state_machine.size() - 1;
-    next_node_id = prev_node_id;
-
-    // BuildItem(size_t tree_node, size_t state_machine_node, bool entering)
-
-    // emplace_back KLEENE_STAR as exit node to close loop
-    tree_deque.emplace_back(build_state.tree_node, state_machine.size() - 2,
-                            false);
-
-    for (auto riter = current_node.children.rbegin();
-         riter != current_node.children.rend(); ++riter) {
-      tree_deque.emplace_back(*riter);
-    }
-
-  } else {
-
-    StateNode &loop_node = state_machine.states.at(prev_node_id);
     loop_node.push_E_transition(build_state.state_machine_node);
-    loop_node.push_E_transition(build_state.state_machine_node + 1);
-    prev_node_id = build_state.state_machine_node;
+
+    state_machine.states.at(build_state.state_machine_node)
+        .push_E_transition(state_machine.size() - 1);
   }
 }
 
 // void StateMachineBuilder::build_RANGE(const ReNode &current_node,
-//                                       const BuildItem &build_state,
-//                                       size_t &prev_node_id,
-//                                       size_t &next_node_id) {}
+//                                       const BuildItem &build_state) {}
 
 void StateMachineBuilder::build_OPTIONAL(const ReNode &current_node,
-                                         const BuildItem &build_state,
-                                         size_t &prev_node_id,
-                                         size_t & /*next_node_id */) {
+                                         const BuildItem &build_state) {
   if (build_state.entering) {
     // emplace_back OPTIONAL as exit node to close loop
     tree_deque.emplace_back(build_state.tree_node, state_machine.size() - 1,
@@ -244,10 +224,52 @@ void StateMachineBuilder::build_OPTIONAL(const ReNode &current_node,
   }
 }
 
+void StateMachineBuilder::build_COUNT(const ReNode &current_node,
+                                      const BuildItem &build_state) {
+  if (build_state.entering) {
+    std::string low_count;
+    std::string upper_count;
+
+    size_t i = 0;
+    while (++i < current_node.children.size() &&
+           tree->getNode(current_node.children.at(i)).content != ',') {
+      low_count +=
+          static_cast<char>(tree->getNode(current_node.children.at(i)).content);
+    }
+    while (++i < current_node.children.size()) {
+      upper_count +=
+          static_cast<char>(tree->getNode(current_node.children.at(i)).content);
+    }
+
+    if (upper_count.empty()) {
+      size_t count = std::stoi(low_count);
+      DEBUG_STDOUT(" count_string : " << low_count << '\n')
+      DEBUG_STDOUT(" Adding count : " << count << '\n')
+      for (size_t i = 0; i < count; i++) {
+        tree_deque.emplace_back(current_node.children.at(0));
+      }
+    } else {
+      size_t low = std::stoi(low_count);
+      size_t high = std::stoi(upper_count);
+      DEBUG_STDOUT(" count_string : " << low << '-' << high << '\n')
+      for (size_t i = 0; i < low; i++) {
+        tree_deque.emplace_back(current_node.children.at(0));
+      }
+      for (size_t i = low; i < high; i++) {
+        tree_deque.emplace_back(current_node.children.at(0));
+        tree_deque.emplace_back(build_state.tree_node, state_machine.size() - 1,
+                                false);
+      }
+    }
+  } else {
+
+    // state_machine.states.at(build_state.state_machine_node)
+    //     .push_E_transition(prev_node_id);
+  }
+}
+
 void StateMachineBuilder::build_AT_START(const ReNode &current_node,
-                                         const BuildItem & /*build_state*/,
-                                         size_t & /*prev_node_id*/,
-                                         size_t &next_node_id) {
+                                         const BuildItem & /*build_state*/) {
   state_machine.states.emplace_back(0);
   state_machine.start_state = 1;
 
@@ -258,9 +280,7 @@ void StateMachineBuilder::build_AT_START(const ReNode &current_node,
 }
 
 void StateMachineBuilder::build_AT_END(const ReNode &current_node,
-                                       const BuildItem & /*build_state*/,
-                                       size_t & /*prev_node_id*/,
-                                       size_t &next_node_id) {
+                                       const BuildItem & /*build_state*/) {
   state_machine.states.emplace_back(0);
   state_machine.start_state = 1;
 
@@ -271,9 +291,7 @@ void StateMachineBuilder::build_AT_END(const ReNode &current_node,
 }
 
 void StateMachineBuilder::build_UNION(const ReNode &current_node,
-                                      const BuildItem &build_state,
-                                      size_t &prev_node_id,
-                                      size_t &next_node_id) {
+                                      const BuildItem &build_state) {
   if (build_state.entering) {
 
     state_machine.states.emplace_back(0);
@@ -293,10 +311,8 @@ void StateMachineBuilder::build_UNION(const ReNode &current_node,
   }
 }
 
-void StateMachineBuilder::build_UNION_SUBEXPRESION(const ReNode &current_node,
-                                                   const BuildItem &build_state,
-                                                   size_t &prev_node_id,
-                                                   size_t &next_node_id) {
+void StateMachineBuilder::build_UNION_SUBEXPRESION(
+    const ReNode &current_node, const BuildItem &build_state) {
   if (build_state.entering) {
 
     // emplace_back UNION as exit node to close loop
@@ -325,7 +341,6 @@ void StateMachineBuilder::build_UNION_SUBEXPRESION(const ReNode &current_node,
 
 void StateMachineBuilder::build_simple_node(
     const ReNode &current_node, const BuildItem &build_state,
-    size_t &prev_node_id, size_t &next_node_id,
     const regex::TransitionFunction &func, const std::string &label) {
 
 #ifdef DEBUG
@@ -336,8 +351,8 @@ void StateMachineBuilder::build_simple_node(
   state_machine.states.emplace_back(0);
   DEBUG_STDOUT("Add Transition  = "
                << static_cast<regex::OpCode>(current_node.content) << " to "
-               << next_node_id << '\n');
-  state_machine.at(prev_node_id).pushTransition(next_node_id, func);
+               << state_machine.size() - 1 << '\n');
+  state_machine.at(prev_node_id).pushTransition(state_machine.size() - 1, func);
   state_machine.at(prev_node_id).pushTransitionLabel(label /* " =  \\s " */);
 }
 

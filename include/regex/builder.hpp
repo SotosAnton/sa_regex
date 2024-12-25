@@ -23,9 +23,8 @@ struct BuildItem {
 
 class StateMachineBuilder {
 
-  using BuildFunction =
-      std::function<void(StateMachineBuilder *, const ReNode &,
-                         const BuildItem &, size_t &, size_t &)>;
+  using BuildFunction = std::function<void(StateMachineBuilder *,
+                                           const ReNode &, const BuildItem &)>;
 
 public:
   StateMachineBuilder(const ReTree *tree) : tree(tree){};
@@ -34,49 +33,38 @@ public:
   const static std::unordered_map<OpCode, BuildFunction> build_map;
 
 private:
-  void build_Node(const ReNode &current_node, const BuildItem &build_state,
-                  size_t &prev_node_id, size_t &next_node_id);
+  void build_Node(const ReNode &current_node, const BuildItem &build_state);
 
   StateMachine state_machine;
   const ReTree *tree;
   std::deque<BuildItem> tree_deque;
+  size_t prev_node_id;
 
-  void build_ROOT(const ReNode &current_node, const BuildItem &build_state,
-                  size_t &prev_node_id, size_t &next_node_id);
+  void build_ROOT(const ReNode &current_node, const BuildItem &build_state);
 
-  void build_BRACKET(const ReNode &current_node, const BuildItem &build_state,
-                     size_t &prev_node_id, size_t &next_node_id);
+  void build_BRACKET(const ReNode &current_node, const BuildItem &build_state);
 
   void build_KLEENE_STAR(const ReNode &current_node,
-                         const BuildItem &build_state, size_t &prev_node_id,
-                         size_t &next_node_id);
+                         const BuildItem &build_state);
 
   void build_REPETITION(const ReNode &current_node,
-                        const BuildItem &build_state, size_t &prev_node_id,
-                        size_t &next_node_id);
+                        const BuildItem &build_state);
 
-  // void build_RANGE(const ReNode &current_node, const BuildItem &build_state,
-  //                  size_t &prev_node_id, size_t &next_node_id);
+  void build_OPTIONAL(const ReNode &current_node, const BuildItem &build_state);
 
-  void build_OPTIONAL(const ReNode &current_node, const BuildItem &build_state,
-                      size_t &prev_node_id, size_t &next_node_id);
+  void build_AT_START(const ReNode &current_node, const BuildItem &build_state);
 
-  void build_AT_START(const ReNode &current_node, const BuildItem &build_state,
-                      size_t &prev_node_id, size_t &next_node_id);
+  void build_AT_END(const ReNode &current_node, const BuildItem &build_state);
 
-  void build_AT_END(const ReNode &current_node, const BuildItem &build_state,
-                    size_t &prev_node_id, size_t &next_node_id);
+  void build_UNION(const ReNode &current_node, const BuildItem &build_state);
 
-  void build_UNION(const ReNode &current_node, const BuildItem &build_state,
-                   size_t &prev_node_id, size_t &next_node_id);
+  void build_COUNT(const ReNode &current_node, const BuildItem &build_state);
 
   void build_UNION_SUBEXPRESION(const ReNode &current_node,
-                                const BuildItem &build_state,
-                                size_t &prev_node_id, size_t &next_node_id);
+                                const BuildItem &build_state);
 
   void build_simple_node(const ReNode &current_node,
-                         const BuildItem &build_state, size_t &prev_node_id,
-                         size_t &next_node_id,
+                         const BuildItem &build_state,
                          const regex::TransitionFunction &func,
                          const std::string &label = "");
 };
