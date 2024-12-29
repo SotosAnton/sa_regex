@@ -30,7 +30,7 @@ int main(int argc, const char *argv[]) {
             << regex::writeMachineDescriptionToFile("../engine.txt", engine)
             << '\n';
 
-  bool res = regex::runStateMachine(engine, input);
+  bool res = regex::runStateMachineSmart(engine, input);
   std::cout << " \n Run : " << res << '\n';
 
   return 0;
