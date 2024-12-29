@@ -71,14 +71,15 @@ void StateMachineBuilder::build_Node(const ReNode &current_node,
 StateMachine StateMachineBuilder::build() {
 
   state_machine.states.emplace_back(0);
+  // state_machine.states.emplace_back(0);
   state_machine.start_state = 0;
   state_machine.final_state = 0;
 
   tree_deque.emplace_back(tree->start_node);
 
-  prev_node_id = 0;
-
   while (!tree_deque.empty()) {
+
+    prev_node_id = state_machine.size() - 1;
 
     const BuildItem build_state = tree_deque.back();
     tree_deque.pop_back();
@@ -98,13 +99,12 @@ StateMachine StateMachineBuilder::build() {
     build_Node(current_node, build_state);
 
     // if (next_node_id != state_machine.size())
-    prev_node_id = state_machine.size() - 1;
   }
-  state_machine.final_state = prev_node_id;
-  state_machine.at(state_machine.final_state).default_transition =
-      state_machine.final_state;
+  state_machine.final_state = state_machine.size() - 1;
+  // state_machine.at(state_machine.final_state).default_transition =
+  //     state_machine.final_state;
 
-  return std::move(state_machine);
+  return state_machine;
 }
 
 void StateMachineBuilder::build_ROOT(const ReNode &current_node,
@@ -168,8 +168,6 @@ void StateMachineBuilder::build_REPETITION(const ReNode &current_node,
     loop_node.push_E_transition(build_state.state_machine_node);
     loop_node.push_E_transition(state_machine.size());
     state_machine.states.emplace_back(0);
-
-    prev_node_id = build_state.state_machine_node;
   }
 }
 
@@ -191,14 +189,17 @@ void StateMachineBuilder::build_KLEENE_STAR(const ReNode &current_node,
 
   } else {
 
+    state_machine.states.emplace_back(0);
+
     StateNode &loop_node = state_machine.states.at(prev_node_id);
 
-    state_machine.states.emplace_back(0);
+    DEBUG_STDERR("push_E_transition from : "
+                 << prev_node_id << " to " << state_machine.size() - 1 << '\n');
     loop_node.push_E_transition(state_machine.size() - 1);
 
     loop_node.push_E_transition(build_state.state_machine_node);
 
-    state_machine.states.at(build_state.state_machine_node)
+    state_machine.states.at(build_state.state_machine_node - 1)
         .push_E_transition(state_machine.size() - 1);
   }
 }
@@ -270,8 +271,8 @@ void StateMachineBuilder::build_COUNT(const ReNode &current_node,
 
 void StateMachineBuilder::build_AT_START(const ReNode &current_node,
                                          const BuildItem & /*build_state*/) {
-  state_machine.states.emplace_back(0);
-  state_machine.start_state = 1;
+  // state_machine.states.emplace_back(0);
+  // state_machine.start_state = 1;
 
   for (auto riter = current_node.children.rbegin();
        riter != current_node.children.rend(); ++riter) {
@@ -280,13 +281,16 @@ void StateMachineBuilder::build_AT_START(const ReNode &current_node,
 }
 
 void StateMachineBuilder::build_AT_END(const ReNode &current_node,
-                                       const BuildItem & /*build_state*/) {
-  state_machine.states.emplace_back(0);
-  state_machine.start_state = 1;
+                                       const BuildItem &build_state) {
+  if (build_state.entering) {
 
-  for (auto riter = current_node.children.rbegin();
-       riter != current_node.children.rend(); ++riter) {
-    tree_deque.emplace_back(*riter);
+    for (auto riter = current_node.children.rbegin();
+         riter != current_node.children.rend(); ++riter) {
+      tree_deque.emplace_back(*riter);
+    }
+    tree_deque.emplace_back(build_state.tree_node, state_machine.size() - 1,
+                            false);
+  } else {
   }
 }
 
@@ -301,13 +305,13 @@ void StateMachineBuilder::build_UNION(const ReNode &current_node,
 
     for (auto riter = current_node.children.rbegin();
          riter != current_node.children.rend(); ++riter) {
-      // state_/machine.at(prev_node_id)
-      // .push_E_transition(state_machine.size() - 1);
       tree_deque.emplace_back(*riter, state_machine.size() - 1, true);
     }
   } else {
-
-    prev_node_id = build_state.state_machine_node;
+    state_machine.states.emplace_back(0);
+    state_machine.states.at(build_state.state_machine_node)
+        .push_E_transition(state_machine.size() - 1);
+    // prev_node_id = build_state.state_machine_node;
   }
 }
 
@@ -315,17 +319,13 @@ void StateMachineBuilder::build_UNION_SUBEXPRESION(
     const ReNode &current_node, const BuildItem &build_state) {
   if (build_state.entering) {
 
-    // emplace_back UNION as exit node to close loop
     state_machine.states.emplace_back(0);
     state_machine.states.at(build_state.state_machine_node - 1)
         .push_E_transition(state_machine.size() - 1);
 
+    // emplace_back UNION as exit node to close loop
     tree_deque.emplace_back(build_state.tree_node,
                             build_state.state_machine_node, false);
-    prev_node_id = build_state.state_machine_node - 1;
-
-    // state_machine.states.at(build_state.state_machine_node)
-    //     .push_E_transition(prev_node_id);
 
     for (auto riter = current_node.children.rbegin();
          riter != current_node.children.rend(); ++riter) {

@@ -31,9 +31,11 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
                                   << " Final: " << engine.final_state << '\n');
   DEBUG_STDOUT(" Input:" << input << '\n')
 
+  MachineState state;
+
   while (!exec_stack.empty()) {
 
-    MachineState state = exec_stack.top();
+    state = exec_stack.top();
     exec_stack.pop();
 
     DEBUG_STDOUT("State: " << state.node_id)
@@ -45,15 +47,7 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
 
       char c = input[state.input_id];
 
-      DEBUG_STDOUT(" Input : " << state.node_id << " c: " << c << '\n')
-
-      // trap node
-      if (node.transitions.empty() && node.e_transitions.empty()) {
-        if (state.node_id == engine.final_state)
-          return true;
-        else
-          return false;
-      }
+      DEBUG_STDOUT(" Input : " << state.input_id << " c: " << c << '\n')
 
       // node.state = state.input_id;
       for (auto transition : node.transitions) {
@@ -72,8 +66,8 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
       transisition_success = true;
     }
 
-    if (!transisition_success && (state.input_id + 1) < input.size())
-      exec_stack.emplace(node.default_transition, state.input_id + 1);
+    // if (!transisition_success && (state.input_id + 1) < input.size())
+    // exec_stack.emplace(node.default_transition, state.input_id + 1);
 
     // if (!transition_succes) {
     //   if (exec_stack.empty()) {
@@ -90,8 +84,13 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
     //   }
     // }
 
-    if (state.node_id == engine.final_state)
+    if (state.node_id ==
+            engine.final_state /*&& state.input_id == input.size()*/
+        && state.input_id > 0) {
+      DEBUG_STDERR("Reached final state : " << engine.final_state << " at "
+                                            << state.input_id << '\n');
       return true;
+    }
   }
 
   DEBUG_STDOUT(" exec_stack : " << exec_stack.size() << "\n")

@@ -18,17 +18,12 @@ struct Transition {
   size_t destination;
 };
 
-struct CountedTransition : public Transition {
-
-  CountedTransition(const size_t destination, const TransitionFunction &func)
-      : Transition(destination, func) {}
-};
-
 struct MachineState {
   size_t node_id;
   size_t input_id;
 
   MachineState(size_t state, size_t in) : node_id(state), input_id(in) {}
+  MachineState() : node_id(0), input_id(0) {}
 };
 
 struct StateNode {
@@ -36,8 +31,6 @@ struct StateNode {
   size_t default_transition = 0;
 
   std::vector<size_t> e_transitions;
-
-  mutable size_t state; /* TODO: Remove mutable*/
 
   StateNode(const size_t default_transition)
       : default_transition(default_transition) {}
@@ -73,9 +66,6 @@ struct StateMachine {
   size_t start_state;
   size_t final_state;
 };
-
-bool runStateMachine(std::unique_ptr<const StateMachine> engine,
-                     const std::string &input);
 
 bool runStateMachine(const StateMachine &engine, const std::string &input);
 

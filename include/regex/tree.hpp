@@ -38,6 +38,39 @@ template <typename T> struct Tree {
     nodes.at(parent).children;
   };
 
+  void splitNodes(const size_t parent, const std::vector<size_t> &children,
+                  const T &content) {
+
+    nodes.emplace_back(parent, content);
+
+    auto &p_child = nodes.at(parent).children;
+
+    // Remove elements of children from p_child
+    p_child.erase(std::remove_if(p_child.begin(), p_child.end(),
+                                 [&children](int a) {
+                                   return std::find(children.begin(),
+                                                    children.end(),
+                                                    a) != children.end();
+                                 }),
+                  p_child.end());
+
+    // add the new split node
+    p_child.push_back(nodes.size() - 1);
+
+    // add the children to the split node
+    auto &new_children = nodes.back().children;
+    new_children.insert(new_children.end(), children.begin(), children.end());
+
+    DEBUG_STDERR(" nodes.back() = " << nodes.back().content << '\n')
+
+    for (auto &x : new_children)
+      DEBUG_STDERR(" X = " << x << '\n')
+
+    // update parent
+    for (auto &x : children)
+      nodes.at(x).parent = nodes.size() - 1;
+  };
+
   void rebaseNode(const size_t node_id, const T &content) {
 
     nodes.emplace_back(node_id, content);

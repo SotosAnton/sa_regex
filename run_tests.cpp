@@ -20,7 +20,7 @@ int main(int argc, const char *argv[]) {
   int pass = 0;
   int total = 0;
 
-  bool verbose = true;
+  bool verbose = false;
 
   for (auto &test_case : data) {
 
