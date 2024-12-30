@@ -48,8 +48,6 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
 #endif
     auto &node = engine.at(state.node_id);
 
-    bool transisition_success = false;
-
     if (state.input_id < input.size()) {
 
       char c = input[state.input_id];
@@ -60,7 +58,6 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
       for (auto transition : node.transitions) {
         if (transition.func(c)) {
           exec_stack.emplace(transition.destination, state.input_id + 1);
-          transisition_success = true;
           DEBUG_STDOUT(" Valid = " << transition.destination << " "
                                    << state.input_id + 1 << '\n');
         }
@@ -70,7 +67,6 @@ bool runStateMachine(const StateMachine &engine, const std::string &input) {
     for (auto transition : node.e_transitions) {
       DEBUG_STDOUT(" push e = " << transition << " " << state.input_id << '\n');
       exec_stack.emplace(transition, state.input_id);
-      transisition_success = true;
     }
 
     if (state.node_id ==
