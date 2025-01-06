@@ -26,20 +26,6 @@ struct MachineState {
   MachineState() : node_id(0), input_id(0) {}
 };
 
-inline bool operator==(const MachineState &t1, const MachineState &t2) {
-  return t1.input_id == t2.input_id && t1.node_id == t2.node_id;
-}
-
-struct MachineStateHash {
-
-  size_t operator()(const MachineState &t) const {
-    return std::hash<size_t>()(t.input_id) ^
-           (std::hash<size_t>()(t.node_id) << 1);
-  }
-};
-
-typedef std::unordered_set<MachineState, MachineStateHash> StateContainer;
-
 struct StateNode {
   std::vector<Transition> transitions;
   size_t default_transition = 0;
@@ -81,7 +67,7 @@ struct StateMachine {
   size_t final_state;
 };
 
-bool runStateMachine(const StateMachine &engine, const std::string &input);
-bool runStateMachineSmart(const StateMachine &engine, const std::string &input);
+bool runStateMachine(const StateMachine &engine, const std::string &input,
+                     const size_t start_index = 0);
 
 } // namespace regex

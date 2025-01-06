@@ -59,7 +59,7 @@ int main(int argc, const char *argv[]) {
 
         case_save = &match_case;
         total++;
-        if (!regex::runStateMachineSmart(engine, match_case))
+        if (!regex::runStateMachine(engine, match_case))
           out_fh << " Re:" << re << " false Negative : " << match_case << '\n';
         else
           pass++;
@@ -71,7 +71,7 @@ int main(int argc, const char *argv[]) {
 
         case_save = &skip_case;
         total++;
-        if (regex::runStateMachineSmart(engine, skip_case))
+        if (regex::runStateMachine(engine, skip_case))
           out_fh << " Re:" << re << " False Positive : " << skip_case << '\n';
         else
           pass++;

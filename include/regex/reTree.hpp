@@ -17,4 +17,17 @@ void printReTree(const ReTree &tree);
 
 OpCode parseBackSlash(size_t &index, const std::string &i);
 
+struct CountedQuantifier {
+  int min;
+  int max;
+  bool range_flag;
+  CountedQuantifier(int min, int max, bool r)
+      : min(min), max(max), range_flag(r){};
+};
+
+CountedQuantifier parseCount(const std::string &re_str, size_t &index);
+
+void buildCountNodes(const CountedQuantifier counter, ReTree &tree,
+                     std::stack<unsigned> &parent_node_stack);
+
 } // namespace regex

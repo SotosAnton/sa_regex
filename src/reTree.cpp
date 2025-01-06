@@ -74,10 +74,11 @@ ReTree parseToTree(const std::string &re_str) {
       break;
     case '{':
 
-      last_node = tree.nodes.at(parent_node_stack.top()).children.back();
-      tree.splitNodes(parent_node_stack.top(), last_node, OpCode::COUNT);
+      buildCountNodes(parseCount(re_str, i), tree, parent_node_stack);
+      // last_node = tree.nodes.at(parent_node_stack.top()).children.back();
+      // tree.splitNodes(parent_node_stack.top(), last_node, OpCode::COUNT);
 
-      parent_node_stack.push(tree.size() - 1);
+      // parent_node_stack.push(tree.size() - 1);
       break;
     case '}':
       if (parent_node_stack.empty()) {
@@ -259,10 +260,11 @@ void printReTree(const ReTree &tree) {
 
 #ifdef DEBUG
 
-    if (visited[current_node_id])
-      throw std::runtime_error(
-          "Tree Parse error: Tree contains cyrcle. Index :" +
-          std::to_string(current_node_id));
+    // if (visited[current_node_id]) {
+    //   throw std::runtime_error(
+    //       "Tree Parse error: Tree contains cyrcle. Index :" +
+    //       std::to_string(current_node_id));
+    // }
 
     visited[current_node_id] = true;
 #endif
@@ -356,6 +358,79 @@ OpCode parseBackSlash(size_t &index, const std::string &i) {
     return static_cast<OpCode>('\\');
     break;
   }
+}
+
+CountedQuantifier parseCount(const std::string &re_str, size_t &index) {
+
+  std::string str_parse;
+
+  int lower_bound = -1;
+  int upper_bound = -1;
+  bool range_flag = false;
+
+  while (++index < re_str.size() && re_str[index] != '}') {
+    char c = re_str[index];
+    if (c == ',') {
+      if (str_parse.size() > 0) {
+        DEBUG_STDERR("Parsing str_parse: " << str_parse << std::endl;);
+
+        lower_bound = std::stoi(str_parse);
+        str_parse.clear();
+        range_flag = true;
+      } else {
+        throw std::runtime_error("Quantifier {} parsing failed at:" + c);
+      }
+    } else if ((c > '9' || c < '0')) {
+      throw std::runtime_error("Quantifier {} invalid char:" + c);
+    } else {
+      str_parse += c;
+      DEBUG_STDERR("Parsing : " << c << std::endl;);
+    }
+  }
+
+  if (str_parse.size() > 0) {
+    if (lower_bound < 0) {
+      DEBUG_STDERR("Parsing lower_bound: " << str_parse << std::endl;);
+      lower_bound = std::stoi(str_parse);
+    } else {
+      DEBUG_STDERR("Parsing upper: " << str_parse << std::endl;);
+      upper_bound = std::stoi(str_parse);
+    }
+  }
+
+  return CountedQuantifier(lower_bound, upper_bound, range_flag);
+}
+
+void buildCountNodes(const CountedQuantifier counter, ReTree &tree,
+                     std::stack<unsigned> &parent_node_stack) {
+  DEBUG_STDERR("Building counter: ")
+  DEBUG_STDERR("min: " << counter.min << " max: " << counter.max
+                       << " range : " << counter.range_flag << '\n')
+  auto &parent_node = parent_node_stack.top();
+
+  size_t last_node = tree.nodes.at(parent_node).children.back();
+  // tree.splitNodes(parent_node_stack.top(), last_node, OpCode::COUNT);
+  if (!counter.range_flag) {
+    for (size_t i = 1; i < counter.min; i++) {
+      tree.nodes.at(parent_node).children.emplace_back(last_node);
+    }
+  } else {
+    for (size_t i = 1; i < counter.min - 1; i++) {
+      tree.nodes.at(parent_node).children.emplace_back(last_node);
+    }
+    if (counter.max > 0) {
+      tree.nodes.at(parent_node).children.emplace_back(last_node);
+      for (size_t i = counter.min; i < counter.max; i++) {
+        tree.push_node(parent_node, OpCode::OPTIONAL);
+        tree.nodes.back().children.emplace_back(last_node);
+      }
+    } else {
+      tree.push_node(parent_node, OpCode::REPETITION);
+      tree.nodes.back().children.emplace_back(last_node);
+    }
+  }
+
+  // parent_node_stack.push(tree.size() - 1);
 }
 
 } // namespace regex

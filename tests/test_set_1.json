@@ -21,13 +21,13 @@
     },
     {
         "re": "a*",
-        "match": ["", "a", "aa", "aaa"],
+        "match": [ "a", "aa", "aaa"],
         "skip": ["b", "ba"]
     },
     {
         "re": "a+",
         "match": ["a", "aa", "aaa"],
-        "skip": ["", "b"]
+        "skip": [ "b"]
     },
     {
         "re": "ca?t",
@@ -103,5 +103,415 @@
         "re": "a.*?b",
         "match": ["a123b", "ab"],
         "skip": ["a123b456b"]
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [
+            "bbbcabbbc"
+        ],
+        "re": "(a|b)*c|(a|ab)*c"
+    },
+    {
+        "match": [
+            "abab"
+        ],
+        "skip": [
+            "aaabab"
+        ],
+        "re": "a?(ab|ba)ab"
+    },
+    {
+        "match": [
+            "aa"
+        ],
+        "skip": [],
+        "re": "(aa|aaa)*|(a|aaaaa)"
+    },
+    {
+        "match": [
+            "aa"
+        ],
+        "skip": [],
+        "re": "(aa|aaa)*|(a|aaaaa)"
+    },
+    {
+        "match": [
+            "aa"
+        ],
+        "skip": [],
+        "re": "(aa|aaa)*|(a|aaaaa)"
+    },
+    {
+        "match": [
+            "aa"
+        ],
+        "skip": [],
+        "re": "(aa|aaa)*|(a|aaaaa)"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "(a)(b)(c)"
+    },
+    {
+        "match": [
+            "x"
+        ],
+        "skip": [],
+        "re": "((((((((((x))))))))))"
+    },
+    {
+        "match": [
+            "xx"
+        ],
+        "skip": [],
+        "re": "((((((((((x))))))))))*"
+    },
+    {
+        "match": [
+            "ababababababababababababababababa"
+        ],
+        "skip": [],
+        "re": "a?(ab|ba)*"
+    },
+    {
+        "match": [
+            "aaaaaaaab"
+        ],
+        "skip": [],
+        "re": "a*a*a*a*a*b"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "abc"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "ab*c"
+    },
+    {
+        "match": [
+            "abbc"
+        ],
+        "skip": [],
+        "re": "ab*bc"
+    },
+    {
+        "match": [
+            "abbbbc"
+        ],
+        "skip": [],
+        "re": "ab*bc"
+    },
+    {
+        "match": [
+            "abbc"
+        ],
+        "skip": [],
+        "re": "ab+bc"
+    },
+    {
+        "match": [
+            "abbbbc"
+        ],
+        "skip": [],
+        "re": "ab+bc"
+    },
+    {
+        "match": [
+            "abbc"
+        ],
+        "skip": [],
+        "re": "ab?bc"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "ab?bc"
+    },
+    {
+        "match": [
+            "ab"
+        ],
+        "skip": [],
+        "re": "ab|cd"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "(a)b(c)"
+    },
+    {
+        "match": [
+            "aaa"
+        ],
+        "skip": [],
+        "re": "a*"
+    },
+    {
+        "match": [
+            "ab"
+        ],
+        "skip": [],
+        "re": "(a+|b)*"
+    },
+    {
+        "match": [
+            "ab"
+        ],
+        "skip": [],
+        "re": "(a+|b)+"
+    },
+    {
+        "match": [
+            "e"
+        ],
+        "skip": [],
+        "re": "a|b|c|d|e"
+    },
+    {
+        "match": [
+            "ef"
+        ],
+        "skip": [],
+        "re": "(a|b|c|d|e)f"
+    },
+    {
+        "match": [
+            "abcdefg"
+        ],
+        "skip": [],
+        "re": "abcd*efg"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "(ab|ab*)bc"
+    },
+    {
+        "match": [
+            "abc","ac","abbbbbbc"
+        ],
+        "skip": ["aabc"],
+        "re": "(ab|a)b*c"
+    },
+    {
+        "match": [
+            "abcd"
+        ],
+        "skip": ["abc"],
+        "re": "((a)(b)c)(d)"
+    },
+    {
+        "match": [
+            "abcd","abc","abc"
+        ],
+        "skip": ["abcbcd"],
+        "re": "(a|ab)(c|bcd)"
+    },
+    {
+        "match": [
+            "abcd"
+        ],
+        "skip": [],
+        "re": "(a|ab)(bcd|c)"
+    },
+    {
+        "match": [
+            "abcd"
+        ],
+        "skip": [],
+        "re": "(ab|a)(c|bcd)"
+    },
+    {
+        "match": [
+            "abcd"
+        ],
+        "skip": [],
+        "re": "(ab|a)(bcd|c)"
+    },
+    {
+        "match": [
+            "abcd"
+        ],
+        "skip": [],
+        "re": "((a|ab)(c|bcd))(d*)"
+    },
+    {
+        "match": [
+            "abcd"
+        ],
+        "skip": [],
+        "re": "((a|ab)(bcd|c))(d*)"
+    },
+    {
+        "match": [
+            "abcd"
+        ],
+        "skip": [],
+        "re": "((ab|a)(c|bcd))(d*)"
+    },
+    {
+        "match": [
+            "abcd"
+        ],
+        "skip": [],
+        "re": "((ab|a)(bcd|c))(d*)"
+    },
+    {
+        "match": [
+            "abcd"
+        ],
+        "skip": [],
+        "re": "(a|ab)((c|bcd)(d*))"
+    },
+    {
+        "match": [
+            "abcd"
+        ],
+        "skip": [],
+        "re": "(a|ab)((bcd|c)(d*))"
+    },
+    {
+        "match": [
+            "abcd"
+        ],
+        "skip": [],
+        "re": "(ab|a)((c|bcd)(d*))"
+    },
+    {
+        "match": [
+            "abcd"
+        ],
+        "skip": [],
+        "re": "(ab|a)((bcd|c)(d*))"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "(a*)(b|abc)"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "(a*)(abc|b)"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "((a*)(b|abc))(c*)"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "((a*)(abc|b))(c*)"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "(a*)((b|abc))(c*)"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "(a*)((abc|b)(c*))"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "(a*)(b|abc)"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "(a*)(abc|b)"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "((a*)(b|abc))(c*)"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "((a*)(abc|b))(c*)"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "(a*)((b|abc)(c*))"
+    },
+    {
+        "match": [
+            "abc"
+        ],
+        "skip": [],
+        "re": "(a*)((abc|b)(c*))"
+    },
+    {
+        "match": [
+            "ab"
+        ],
+        "skip": [],
+        "re": "(a|ab)"
+    },
+    {
+        "match": [
+            "ab"
+        ],
+        "skip": [],
+        "re": "(ab|a)"
+    },
+    {
+        "match": [
+            "ab"
+        ],
+        "skip": [],
+        "re": "(a|ab)(b*)"
+    },
+    {
+        "match": [
+            "ab"
+        ],
+        "skip": [],
+        "re": "(ab|a)(b*)"
     }
 ]
