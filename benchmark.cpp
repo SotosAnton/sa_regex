@@ -61,7 +61,7 @@ int main() {
   std::vector<std::pair<size_t, size_t>> sa_matches;
 
   Timer("Match time", [&engine, &fileContents, &res, &sa_matches]() {
-    res = engine->run(fileContents, &sa_matches);
+    res = engine->search(fileContents, &sa_matches);
   });
 
   std::cout << "Match result: " << (res ? "true" : "false") << std::endl;

@@ -5,13 +5,37 @@
 
 namespace regex {
 
-bool StateMachineExecutor::run(
+bool StateMachineExecutor::search(
+    const std::string input, std::vector<std::pair<size_t, size_t>> *matches) {
+  if (!engine)
+    throw std::runtime_error("StateMachineExecutor not initialized.");
+  size_t start = 0;
+  size_t match_index = 0;
+  reset();
+
+  while (start < input.size()) {
+    if (runStateMachineSmart(input, start, &match_index)) {
+      if (matches)
+        matches->push_back({start, match_index - start});
+      return true;
+    }
+    start++;
+  }
+  return false;
+};
+
+void StateMachineExecutor::reset() {
+  set_1.clear();
+  set_2.clear();
+}
+bool StateMachineExecutor::scan(
     const std::string input, std::vector<std::pair<size_t, size_t>> *matches) {
   if (!engine)
     throw std::runtime_error("StateMachineExecutor not initialized.");
   size_t start = 0;
   size_t match_index = 0;
   bool res = false;
+  reset();
 
   while (start < input.size()) {
     if (runStateMachineSmart(input, start, &match_index)) {
@@ -23,6 +47,14 @@ bool StateMachineExecutor::run(
     start++;
   }
   return res;
+};
+
+bool StateMachineExecutor::match(const std::string input) {
+  if (!engine)
+    throw std::runtime_error("StateMachineExecutor not initialized.");
+
+  reset();
+  return runStateMachineSmart(input, 0);
 };
 
 void StateMachineExecutor::depthFirstSearch(const MachineState &start_state,

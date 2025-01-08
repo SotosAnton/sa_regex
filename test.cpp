@@ -4,6 +4,8 @@
 #include <regex/state_machine.hpp>
 #include <regex/state_machine_export.hpp>
 
+#include <regex/sa_regex.hpp>
+
 int main(int argc, const char *argv[]) {
 
   std::string input = "3";
@@ -32,6 +34,9 @@ int main(int argc, const char *argv[]) {
 
   bool res = regex::runStateMachine(engine, input);
   std::cout << " \n Run : " << res << '\n';
+
+  auto api_engine = std::make_unique<sa_::Regex>(re);
+  std::cout << " \n Api Run : " << api_engine->match(input) << '\n';
 
   return 0;
 }

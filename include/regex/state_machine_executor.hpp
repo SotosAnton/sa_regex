@@ -27,10 +27,15 @@ public:
   }
 
   StateMachineExecutor() { engine = nullptr; }
-  bool run(const std::string input,
-           std::vector<std::pair<size_t, size_t>> *matches = nullptr);
+  bool match(const std::string input);
+  bool search(const std::string input,
+              std::vector<std::pair<size_t, size_t>> *matches = nullptr);
+
+  bool scan(const std::string input,
+            std::vector<std::pair<size_t, size_t>> *matches = nullptr);
 
 private:
+  void reset();
   void depthFirstSearch(const MachineState &start_state,
                         StateContainer *state_container);
 

@@ -12,13 +12,17 @@ class Regex {
 public:
   Regex(const std::string &re);
   Regex(){};
-  bool operator()(const std::string input,
-                  std::vector<std::pair<size_t, size_t>> *matches) {
-    return run(input, matches);
-  };
-  bool run(const std::string input,
-           std::vector<std::pair<size_t, size_t>> *matches);
+  bool operator()(const std::string input) { return match(input); };
+  bool match(const std::string input);
+  bool search(const std::string input,
+              std::vector<std::pair<size_t, size_t>> *matches = nullptr);
+  bool scan(const std::string input,
+            std::vector<std::pair<size_t, size_t>> *matches = nullptr);
   size_t size() const { return engine.size(); }
+
+  bool saveTofile(const std::string &filename) {
+    return writeMachineDescriptionToFile(filename, engine);
+  };
 
 private:
   regex::StateMachine engine;

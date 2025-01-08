@@ -3,9 +3,7 @@
 #include <iostream>
 #include <regex/builder.hpp>
 
-#include <regex/reTree.hpp>
-#include <regex/state_machine.hpp>
-#include <regex/state_machine_export.hpp>
+#include <regex/sa_regex.hpp>
 
 using json = nlohmann::json;
 
@@ -32,34 +30,27 @@ int main(int argc, const char *argv[]) {
 
     std::cout << "Testing re : " << re << "\n";
 
-    regex::StateMachine engine;
-    regex::ReTree tree;
+    std::unique_ptr<sa_::Regex> engine;
 
     try {
-      tree = regex::parseToTree(re);
+      engine = std::make_unique<sa_::Regex>(re);
     } catch (std::exception &e) {
-      std::cerr << "\nError while parsing.\n re: " << re
+      std::cerr << "\nError while building regex engine.\n re: " << re
                 << " Error : " << e.what() << '\n';
       break;
     }
 
-    try {
-      engine = regex::buildStateMachineFromTree(tree);
-    } catch (std::exception &e) {
-      std::cerr << "\nError while buidling state machine.\n re: " << re
-                << " Error : " << e.what() << '\n';
-      break;
-    }
     std::string *case_save = nullptr;
 
     try {
       for (auto &match_case : match) {
+
         if (verbose)
           std::cout << "Match case : " << match_case << "\n";
 
         case_save = &match_case;
         total++;
-        if (!regex::runStateMachine(engine, match_case))
+        if (!engine->match(match_case))
           out_fh << " Re:" << re << " false Negative : " << match_case << '\n';
         else
           pass++;
@@ -71,7 +62,7 @@ int main(int argc, const char *argv[]) {
 
         case_save = &skip_case;
         total++;
-        if (regex::runStateMachine(engine, skip_case))
+        if (engine->match(skip_case))
           out_fh << " Re:" << re << " False Positive : " << skip_case << '\n';
         else
           pass++;
@@ -83,9 +74,7 @@ int main(int argc, const char *argv[]) {
                 << " Error : " << e.what() << '\n';
 
       try {
-        std::cout << " Save : "
-                  << regex::writeMachineDescriptionToFile("engine.txt", engine)
-                  << '\n';
+        std::cout << " Save : " << engine->saveTofile("engine.txt") << '\n';
       } catch (std::exception &e) {
         std::cerr << "Failed to export state machine: " << e.what() << '\n';
       }

@@ -7,9 +7,14 @@ Regex::Regex(const std::string &re) {
   executor = regex::StateMachineExecutor(&engine);
 }
 
-bool Regex::run(const std::string input,
-                std::vector<std::pair<size_t, size_t>> *matches) {
-  return executor.run(input, matches);
+bool Regex::match(const std::string input) { return executor.match(input); }
+bool Regex::search(const std::string input,
+                   std::vector<std::pair<size_t, size_t>> *matches) {
+  return executor.search(input, matches);
+}
+bool Regex::scan(const std::string input,
+                 std::vector<std::pair<size_t, size_t>> *matches) {
+  return executor.scan(input, matches);
 }
 
 } // namespace sa_
