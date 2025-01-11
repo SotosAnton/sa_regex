@@ -5,6 +5,8 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+option ( TRACY_ENABLE "" OFF )
+
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 # Ensure debug symbols are included
@@ -12,28 +14,41 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_C_FLAGS_DEBUG "-g")
 
 project (sregex)
-
 include_directories(include)
 
-set(SOURCES
-  
+set(SOURCES  
   # src//til.cpp
   src/state_machine.cpp
   src/builder.cpp
   src/state_machine_export.cpp
-  src/tree_machine.cpp
   src/reTree.cpp
   src/opcode.cpp
   src/sa_regex.cpp
-  src/state_machine_executor.cpp
-  
+  src/state_machine_executor.cpp  
 )
+
+if(TRACY_ENABLE)
+  option ( TRACY_ON_DEMAND "" ON )
+  option ( TRACY_NO_EXIT "" ON )
+  add_subdirectory ( external/tracy ) # target : TracyClient or alias Tracy :: TracyClient
+endif()
+
+# Add Tracy's source if enabled
+if(TRACY_ENABLE)
+  list(APPEND SOURCES external/tracy/public/TracyClient.cpp)
+endif()
+
 set(HEADERS
   include/regex/util.hpp
   include/regex/state_machine.hpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+
+if(TRACY_ENABLE)
+  target_link_libraries(${PROJECT_NAME} PUBLIC Tracy::TracyClient)
+endif()
+
 add_executable(${PROJECT_NAME}_run test.cpp )
 add_executable(${PROJECT_NAME}_test run_tests.cpp )
 add_executable(${PROJECT_NAME}_benchmark benchmark.cpp )

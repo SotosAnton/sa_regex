@@ -23,7 +23,7 @@ inline bool operator==(const MachineState &t1, const MachineState &t2) {
 class StateMachineExecutor {
 public:
   StateMachineExecutor(const StateMachine *engine) : engine(engine) {
-    state_set.resize(engine->size());
+    depthFirstSearchCache();
   }
 
   StateMachineExecutor() { engine = nullptr; }
@@ -38,6 +38,8 @@ private:
   void reset();
   void depthFirstSearch(const MachineState &start_state,
                         StateContainer *state_container);
+
+  void depthFirstSearchCache();
 
   bool runStateMachineSmart(const std::string &input, const size_t start_index,
                             size_t *end_index = nullptr);

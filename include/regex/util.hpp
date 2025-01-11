@@ -4,6 +4,15 @@
 
 // #define DEBUG
 
+#ifdef TRACY_ENABLE
+#include "tracy/Tracy.hpp"
+#define TRACY_ZONE_SCOPED ZoneScoped;
+#define TRACY_ZONE_NAMED(name) ZoneScopedN(name);
+#else
+#define TRACY_ZONE_SCOPED
+#define TRACY_ZONE_NAMED(name) ;
+#endif
+
 #ifdef DEBUG
 #define DEBUG_STDERR(x)                                                        \
   do {                                                                         \

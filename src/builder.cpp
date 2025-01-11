@@ -108,7 +108,7 @@ StateMachine StateMachineBuilder::build() {
 }
 
 void StateMachineBuilder::build_ROOT(const ReNode &current_node,
-                                     const BuildItem &build_state) {
+                                     const BuildItem & /* build_state */) {
 #ifdef DEBUG
   if (!build_state.entering)
     throw std::runtime_error("Root node exit.");
@@ -121,7 +121,7 @@ void StateMachineBuilder::build_ROOT(const ReNode &current_node,
 }
 
 void StateMachineBuilder::build_BRACKET(const ReNode &current_node,
-                                        const BuildItem &build_state) {
+                                        const BuildItem & /*build_state*/) {
   state_machine.states.emplace_back(0);
   for (unsigned child_id : current_node.children) {
     const ReNode &child_node = tree->getNode(child_id);

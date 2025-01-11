@@ -7,6 +7,7 @@ namespace regex {
 
 bool StateMachineExecutor::search(
     const std::string input, std::vector<std::pair<size_t, size_t>> *matches) {
+  TRACY_ZONE_SCOPED
   if (!engine)
     throw std::runtime_error("StateMachineExecutor not initialized.");
   size_t start = 0;
@@ -57,30 +58,37 @@ bool StateMachineExecutor::match(const std::string input) {
   return runStateMachineSmart(input, 0);
 };
 
-void StateMachineExecutor::depthFirstSearch(const MachineState &start_state,
-                                            StateContainer *state_container) {
+void StateMachineExecutor::depthFirstSearchCache() {
+  std::stack<size_t> node_stack;
+  std::vector<bool> visited(engine->size(), false);
 
-  if (state_set.at(start_state.node_id).empty()) {
-    std::stack<size_t> node_stack;
-    node_stack.emplace(start_state.node_id);
+  for (size_t i = 0; i < engine->size(); i++) {
+    node_stack.emplace(i);
+    state_set.emplace_back(std::vector<size_t>{i});
     while (!node_stack.empty()) {
       auto &node = engine->at(node_stack.top());
       node_stack.pop();
+
       for (auto &transision : node.e_transitions) {
-        MachineState tmp_state(transision, start_state.input_id);
-        if (!state_container->contains(tmp_state)) {
-          state_container->insert(tmp_state);
+        if (!visited.at(transision)) {
+          visited.at(transision) = true;
           node_stack.push(transision);
-          state_set.at(start_state.node_id).push_back(transision);
+          state_set.at(i).emplace_back(transision);
         }
       }
     }
-  } else {
-    for (auto &item : state_set.at(start_state.node_id)) {
-      MachineState tmp_state(item, start_state.input_id);
-      if (!state_container->contains(tmp_state)) {
-        state_container->insert(tmp_state);
-      }
+    for (size_t x : state_set.at(i))
+      visited.at(x) = false;
+  }
+}
+
+void StateMachineExecutor::depthFirstSearch(const MachineState &start_state,
+                                            StateContainer *state_container) {
+  TRACY_ZONE_SCOPED
+  for (auto &item : state_set.at(start_state.node_id)) {
+    MachineState tmp_state(item, start_state.input_id);
+    if (!state_container->contains(tmp_state)) {
+      state_container->insert(tmp_state);
     }
   }
 }
@@ -88,7 +96,7 @@ void StateMachineExecutor::depthFirstSearch(const MachineState &start_state,
 bool StateMachineExecutor::runStateMachineSmart(const std::string &input,
                                                 const size_t start_index,
                                                 size_t *end_index) {
-
+  TRACY_ZONE_SCOPED
   MachineState state(engine->start_state, 0);
   StateContainer *current_stateSet = &set_1;
   StateContainer *next_stateSet = &set_2;
@@ -97,7 +105,6 @@ bool StateMachineExecutor::runStateMachineSmart(const std::string &input,
   unsigned step_counter = 0;
 #endif
 
-  current_stateSet->emplace(MachineState(engine->start_state, start_index));
   depthFirstSearch(MachineState(engine->start_state, start_index),
                    current_stateSet);
 
@@ -106,7 +113,7 @@ bool StateMachineExecutor::runStateMachineSmart(const std::string &input,
   DEBUG_STDOUT(" Input:" << input << '\n')
 
   while (!current_stateSet->empty()) {
-
+    TRACY_ZONE_NAMED("Loop")
     for (auto it = current_stateSet->begin(); it != current_stateSet->end();
          it++) {
       const MachineState &state = *it;
@@ -125,8 +132,8 @@ bool StateMachineExecutor::runStateMachineSmart(const std::string &input,
 
         // node.state = state.input_id;
         for (auto transition : node.transitions) {
+          TRACY_ZONE_NAMED("Transitions")
           if (transition.func(c)) {
-            next_stateSet->emplace(transition.destination, state.input_id + 1);
             depthFirstSearch(
                 MachineState(transition.destination, state.input_id + 1),
                 next_stateSet);
