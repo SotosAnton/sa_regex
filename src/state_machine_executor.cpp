@@ -29,6 +29,7 @@ void StateMachineExecutor::reset() {
   set_1.clear();
   set_2.clear();
 }
+
 bool StateMachineExecutor::scan(
     const std::string input, std::vector<std::pair<size_t, size_t>> *matches) {
   if (!engine)
@@ -133,7 +134,7 @@ bool StateMachineExecutor::runStateMachineSmart(const std::string &input,
         // node.state = state.input_id;
         for (auto transition : node.transitions) {
           TRACY_ZONE_NAMED("Transitions")
-          if (transition.func(c)) {
+          if (transition(c)) {
             depthFirstSearch(
                 MachineState(transition.destination, state.input_id + 1),
                 next_stateSet);
@@ -201,8 +202,8 @@ bool StateMachineExecutor::runStateMachine(const std::string &input,
       DEBUG_STDOUT(" Input : " << state.input_id << " c: " << c << '\n')
 
       // node.state = state.input_id;
-      for (auto transition : node.transitions) {
-        if (transition.func(c)) {
+      for (const auto &transition : node.transitions) {
+        if (transition(c)) {
           exec_stack.emplace(transition.destination, state.input_id + 1);
           DEBUG_STDOUT(" Valid = " << transition.destination << " "
                                    << state.input_id + 1 << '\n');

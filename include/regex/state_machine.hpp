@@ -18,6 +18,66 @@ struct Transition {
   size_t destination;
 };
 
+struct TransitionFunctor {
+
+  enum Type {
+    EQUAL,
+    RANGE,
+    DIGIT,
+    WORD_CHAR,
+    NON_DIGIT,
+    NON_WORD_CHAR,
+    WHITESPACE,
+    NON_WHITESPACE,
+    WILDCARD
+  };
+
+  TransitionFunctor(const size_t destination, const Type type)
+      : destination(destination), type(type) {}
+  TransitionFunctor(const size_t destination, const Type type,
+                    const u_int32_t a)
+      : destination(destination), type(type), a(a) {}
+  TransitionFunctor(const size_t destination, const Type type,
+                    const u_int32_t a, const u_int32_t b)
+      : destination(destination), type(type), a(a), b(b) {}
+
+  size_t destination;
+  Type type;
+  u_int32_t a;
+
+  u_int32_t b;
+#ifdef DEBUG
+  std::string label;
+#endif
+
+  bool operator()(const u_int32_t c) const {
+    switch (type) {
+    case EQUAL:
+      return isEqual(c, a);
+    case RANGE:
+      return isInRange(c, a, b);
+    case DIGIT:
+      return isDigit(c);
+    case WORD_CHAR:
+      return isWordChar(c);
+    case NON_DIGIT:
+      return isNotDigit(c);
+    case NON_WORD_CHAR:
+      return isNotWordChar(c);
+    case WHITESPACE:
+      return isWhitespace(c);
+    case NON_WHITESPACE:
+      return isNotWhitespace(c);
+    case WILDCARD:
+      return wildcard(c);
+      // default:
+      //   std::cerr << " AHA;\n";
+      //   throw std::runtime_error("TransitionFunctor invalid operation : " +
+      //                            static_cast<char>(c));
+    }
+  }
+};
+
 struct MachineState {
   size_t node_id;
   size_t input_id;
@@ -27,7 +87,8 @@ struct MachineState {
 };
 
 struct StateNode {
-  std::vector<Transition> transitions;
+  // std::vector<Transition> transitions;
+  std::vector<TransitionFunctor> transitions;
   size_t default_transition = 0;
 
   std::vector<size_t> e_transitions;
@@ -42,12 +103,26 @@ struct StateNode {
   }
 
   void pushTransition(const size_t destination,
-                      const TransitionFunction &func) {
-    transitions.emplace_back(destination, func);
+                      const TransitionFunctor::Type type) {
+    transitions.emplace_back(destination, type);
+  }
+
+  void pushTransition(const size_t destination,
+                      const TransitionFunctor::Type type, const u_int32_t a) {
+    transitions.emplace_back(destination, type, a);
+  }
+  void pushTransition(const size_t destination,
+                      const TransitionFunctor::Type type, const u_int32_t a,
+                      const u_int32_t b) {
+    transitions.emplace_back(destination, type, a, b);
   }
 
   void pushTransitionLabel(const std::string &label) {
+#ifdef DEBUG
     transitions.back().label = label;
+#else
+    (void)label;
+#endif
   }
 };
 

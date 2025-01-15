@@ -19,8 +19,10 @@ std::string generateStateMachineDescription(const StateMachine &engine) {
     for (auto &transition : current_node.transitions) {
 
       output << to_string(i) << " -> " << to_string(transition.destination);
+#ifdef DEBUG
       if (!transition.label.empty())
         output << " [" << transition.label << "]";
+#endif
       output << '\n';
     }
 

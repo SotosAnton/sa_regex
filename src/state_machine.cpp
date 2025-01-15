@@ -40,8 +40,8 @@ bool runStateMachine(const StateMachine &engine, const std::string &input,
       DEBUG_STDOUT(" Input : " << state.input_id << " c: " << c << '\n')
 
       // node.state = state.input_id;
-      for (auto transition : node.transitions) {
-        if (transition.func(c)) {
+      for (const auto &transition : node.transitions) {
+        if (transition(c)) {
           exec_stack.emplace(transition.destination, state.input_id + 1);
           DEBUG_STDOUT(" Valid = " << transition.destination << " "
                                    << state.input_id + 1 << '\n');

@@ -49,6 +49,7 @@ int main() {
 
   // std::string re = "([a-zA-z]+, )+(true(, )?)+true";
   std::string re = "([a-zA-z]+, )+(true(, )?)+true";
+  // std::string re = "(([a-zA-z]+, )+(true(, )?)+true)|[a-z_]*<[a-g]+>";
 
   std::unique_ptr<sa_::Regex> engine;
 

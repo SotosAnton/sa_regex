@@ -21,12 +21,11 @@ using std::to_string;
     }                                                                          \
   }
 
-#define BUILD_MAP_ITEM_SIMPLE(code, func, label)                               \
+#define BUILD_MAP_ITEM_SIMPLE(code, type, label)                               \
   {                                                                            \
     code, [](StateMachineBuilder *self, const ReNode &node,                    \
              const BuildItem &state) {                                         \
-      self->build_simple_node(node, state,                                     \
-                              std::bind(func, std::placeholders::_1), label);  \
+      self->build_simple_node(node, state, type, label);                       \
     }                                                                          \
   }
 
@@ -43,13 +42,21 @@ const std::unordered_map<OpCode, StateMachineBuilder::BuildFunction>
         BUILD_MAP_ITEM(OpCode::AT_START, build_AT_START),
         BUILD_MAP_ITEM(OpCode::AT_END, build_AT_END),
         BUILD_MAP_ITEM(OpCode::COUNT, build_COUNT),
-        BUILD_MAP_ITEM_SIMPLE(OpCode::WILDCARD, wildcard, " =  . "),
-        BUILD_MAP_ITEM_SIMPLE(OpCode::DIGIT, isDigit, " =  \\d "),
-        BUILD_MAP_ITEM_SIMPLE(OpCode::WORD_CHAR, isWordChar, " =  \\w "),
-        BUILD_MAP_ITEM_SIMPLE(OpCode::NON_DIGIT, isNotDigit, " =  \\D "),
-        BUILD_MAP_ITEM_SIMPLE(OpCode::NON_WORD_CHAR, isNotWordChar, " =  \\W "),
-        BUILD_MAP_ITEM_SIMPLE(OpCode::WHITESPACE, isWhitespace, " =  \\s "),
-        BUILD_MAP_ITEM_SIMPLE(OpCode::NON_WHITESPACE, isNotWhitespace,
+        BUILD_MAP_ITEM_SIMPLE(OpCode::WILDCARD,
+                              TransitionFunctor::Type::WILDCARD, " =  . "),
+        BUILD_MAP_ITEM_SIMPLE(OpCode::DIGIT, TransitionFunctor::Type::DIGIT,
+                              " =  \\d "),
+        BUILD_MAP_ITEM_SIMPLE(OpCode::WORD_CHAR,
+                              TransitionFunctor::Type::WORD_CHAR, " =  \\w "),
+        BUILD_MAP_ITEM_SIMPLE(OpCode::NON_DIGIT,
+                              TransitionFunctor::Type::NON_DIGIT, " =  \\D "),
+        BUILD_MAP_ITEM_SIMPLE(OpCode::NON_WORD_CHAR,
+                              TransitionFunctor::Type::NON_WORD_CHAR,
+                              " =  \\W "),
+        BUILD_MAP_ITEM_SIMPLE(OpCode::WHITESPACE,
+                              TransitionFunctor::Type::WHITESPACE, " =  \\s "),
+        BUILD_MAP_ITEM_SIMPLE(OpCode::NON_WHITESPACE,
+                              TransitionFunctor::Type::NON_WHITESPACE,
                               " =  \\S "),
         BUILD_MAP_THROW(OpCode::RANGE),
 
@@ -59,10 +66,8 @@ void StateMachineBuilder::build_Node(const ReNode &current_node,
                                      const BuildItem &build_state) {
   auto search = build_map.find(static_cast<OpCode>(current_node.content));
   if (search == build_map.end()) {
-    build_simple_node(
-        current_node, build_state,
-        std::bind(isEqual, std::placeholders::_1, current_node.content),
-        " = " + std::string(1, static_cast<char>(current_node.content)));
+    build_equal_node(current_node, build_state),
+        " = " + std::string(1, static_cast<char>(current_node.content));
   } else {
     search->second(this, current_node, build_state);
   }
@@ -108,10 +113,12 @@ StateMachine StateMachineBuilder::build() {
 }
 
 void StateMachineBuilder::build_ROOT(const ReNode &current_node,
-                                     const BuildItem & /* build_state */) {
+                                     const BuildItem &build_state) {
 #ifdef DEBUG
   if (!build_state.entering)
     throw std::runtime_error("Root node exit.");
+#else
+  (void)build_state;
 #endif
 
   for (auto it = current_node.children.rbegin();
@@ -130,9 +137,8 @@ void StateMachineBuilder::build_BRACKET(const ReNode &current_node,
       auto r_max = tree->getNode(child_node.children[1]).content;
 
       state_machine.at(prev_node_id)
-          .pushTransition(
-              state_machine.size() - 1,
-              std::bind(isInRange, std::placeholders::_1, r_min, r_max));
+          .pushTransition(state_machine.size() - 1, TransitionFunctor::RANGE,
+                          r_min, r_max);
 
       state_machine.at(prev_node_id)
           .pushTransitionLabel(std::string(1, static_cast<char>(r_min)) +
@@ -140,9 +146,8 @@ void StateMachineBuilder::build_BRACKET(const ReNode &current_node,
                                std::string(1, static_cast<char>(r_max)));
     } else {
       state_machine.at(prev_node_id)
-          .pushTransition(
-              state_machine.size() - 1,
-              std::bind(isEqual, std::placeholders::_1, child_node.content));
+          .pushTransition(state_machine.size() - 1, TransitionFunctor::EQUAL,
+                          child_node.content);
       state_machine.at(prev_node_id)
           .pushTransitionLabel(
               " = " + std::string(1, static_cast<char>(child_node.content)));
@@ -339,20 +344,30 @@ void StateMachineBuilder::build_UNION_SUBEXPRESION(
   }
 }
 
-void StateMachineBuilder::build_simple_node(
-    const ReNode &current_node, const BuildItem &build_state,
-    const regex::TransitionFunction &func, const std::string &label) {
-
-#ifdef DEBUG
-  if (!build_state.entering)
-    throw std::runtime_error("build_simple_node exit.");
-#endif
+void StateMachineBuilder::build_simple_node(const ReNode &current_node,
+                                            const BuildItem &build_state,
+                                            const TransitionFunctor::Type type,
+                                            const std::string &label) {
 
   state_machine.states.emplace_back(0);
   DEBUG_STDOUT("Add Transition  = "
                << static_cast<regex::OpCode>(current_node.content) << " to "
                << state_machine.size() - 1 << '\n');
-  state_machine.at(prev_node_id).pushTransition(state_machine.size() - 1, func);
+  state_machine.at(prev_node_id).pushTransition(state_machine.size() - 1, type);
+  state_machine.at(prev_node_id).pushTransitionLabel(label /* " =  \\s " */);
+}
+
+void StateMachineBuilder::build_equal_node(const ReNode &current_node,
+                                           const BuildItem &build_state,
+                                           const std::string &label) {
+
+  state_machine.states.emplace_back(0);
+  DEBUG_STDOUT("Add Transition  = "
+               << static_cast<regex::OpCode>(current_node.content) << " to "
+               << state_machine.size() - 1 << '\n');
+  state_machine.at(prev_node_id)
+      .pushTransition(state_machine.size() - 1, TransitionFunctor::Type::EQUAL,
+                      current_node.content);
   state_machine.at(prev_node_id).pushTransitionLabel(label /* " =  \\s " */);
 }
 

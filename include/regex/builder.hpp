@@ -65,8 +65,12 @@ private:
 
   void build_simple_node(const ReNode &current_node,
                          const BuildItem &build_state,
-                         const regex::TransitionFunction &func,
+                         const TransitionFunctor::Type type,
                          const std::string &label = "");
+
+  void build_equal_node(const ReNode &current_node,
+                        const BuildItem &build_state,
+                        const std::string &label = "");
 };
 
 } // namespace regex
